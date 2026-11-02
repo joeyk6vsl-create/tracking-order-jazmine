@@ -120,6 +120,30 @@ test('raster QR validation preserves the exact decoded bank payload in the print
     code('INVALID_PAYMENT_QR'),
   );
 });
+test('unsupported bank QR diagnostics identify the stage without exposing the decoded account', () => {
+  const failureMessage = (payload: string) => {
+    try {
+      validatePaymentPayload(payload, 'LAK');
+    } catch (e) {
+      assert(e instanceof AppError);
+      assert.equal(e.code, 'INVALID_PAYMENT_QR');
+      return e.message;
+    }
+    assert.fail('Expected rejection');
+  };
+  const privateMarker = 'PRIVATE-ACCOUNT-DO-NOT-EXPOSE';
+  const linkMessage = failureMessage('bankapp://receive/' + privateMarker);
+  assert.match(linkMessage, /QR-FORMAT/);
+  assert(!linkMessage.includes(privateMarker));
+  assert.match(failureMessage('000201' + '2699broken'), /QR-STRUCTURE/);
+  // Well-formed payload with currency and CRC, but missing merchant profile fields.
+  const body = '00020101021126' + String(privateMarker.length) + privateMarker + '53034186304';
+  const profileMessage = failureMessage(body + paymentQrCrc(body));
+  assert.match(profileMessage, /QR-BANK-PROFILE/);
+  assert(!profileMessage.includes(privateMarker));
+  assert.match(failureMessage(fixtureBankPayload('THB')), /currency/);
+  assert.match(failureMessage(fixtureBankPayload('LAK', '54041000')), /fixed amount/);
+});
 test('empty settings never invent an account; only owner can configure and activate; ADMIN can read/check active images without business mutations', async () => {
   const f = await productionFixture();
   try {

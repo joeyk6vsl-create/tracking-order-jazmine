@@ -18,14 +18,17 @@ export function paymentQrCrc(text: string) {
   return crc.toString(16).toUpperCase().padStart(4, '0');
 }
 export function validatePaymentPayload(text: string, currency: PaymentQrCurrency) {
+  // Report the failed stage, never decoded account numbers or the bank payload.
   const bad =
-    'ໃຊ້ QR ຮັບເງິນຮ້ານຄ້າແບບໃຊ້ຊ້ຳຈາກທະນາຄານ / Use a reusable merchant payment QR from your bank (static EMV format)';
+    'ອ່ານ QR ໄດ້ ແຕ່ໂຄງສ້າງຂໍ້ມູນບໍ່ກົງ / QR data structure is incomplete or unsupported. Share the original image and bank name for checking. [QR-STRUCTURE]';
   if (
     !text.startsWith('000201') ||
     text.length > 2048 ||
     [...text].some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127)
   )
-    fail(bad);
+    fail(
+      'ອ່ານ QR ໄດ້ ແຕ່ຮູບແບບນີ້ຍັງບໍ່ຮອງຮັບ / QR was read, but this format is not supported. Use the original receiving QR from the bank app; share the image and bank name if it still fails. [QR-FORMAT]',
+    );
   const chars = Array.from(text),
     values = new Map<string, string>();
   let p = 0;
@@ -62,7 +65,9 @@ export function validatePaymentPayload(text: string, currency: PaymentQrCurrency
     !values.get('59') ||
     !values.get('60')
   )
-    fail(bad);
+    fail(
+      'ອ່ານ QR ໄດ້ ແຕ່ຂໍ້ມູນທະນາຄານຕ່າງຈາກຮູບແບບທີ່ຮອງຮັບ / The bank QR fields differ from the supported format. Share the original QR image and bank name for compatibility checking. This does not mean your bank QR is invalid. [QR-BANK-PROFILE]',
+    );
 }
 export async function validatePaymentImage(base64: string, currency: PaymentQrCurrency) {
   if (base64.length > 1400000) fail('ໃຊ້ຮູບບໍ່ເກີນ 1 MB / Use an image up to 1 MB');
