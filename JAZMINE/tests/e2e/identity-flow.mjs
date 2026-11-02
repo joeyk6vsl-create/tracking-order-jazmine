@@ -249,9 +249,15 @@ try {
   await page.getByLabel('ชื่อลูกค้าของร่าง', { exact: true }).fill('ขาจรสำหรับทดสอบร่าง');
   await page.getByLabel('เบอร์ลูกค้าของร่าง', { exact: true }).fill('02055558888');
   await page.getByLabel('แบบเสื้อ', { exact: true }).selectOption(configuredProduct);
-  await page.getByLabel('ไซซ์', { exact: true }).selectOption('M');
-  await page.getByLabel('เนื้อผ้า', { exact: true }).selectOption(firstFabric);
-  await page.getByLabel('จำนวนที่คิดเงิน', { exact: true }).fill('6');
+  const draftFabricName = (
+    await db.query('SELECT name FROM catalog_items WHERE id=$1', [firstFabric])
+  )[0].name;
+  await page
+    .locator('.product-options')
+    .getByRole('button', { name: draftFabricName, exact: true })
+    .click();
+  await page.getByLabel('Quantity M', { exact: true }).fill('6');
+  await page.getByLabel('Quantity L', { exact: true }).fill('4');
   const requiredComponentNames = [
     ['แขนเสื้อ', 'ແຂນສັ້ນ'],
     ['บ่าเสื้อ', 'ບ່າທຳມະດາ'],
@@ -262,19 +268,7 @@ try {
       .id;
     await page.getByLabel(label, { exact: true }).selectOption(componentId);
   }
-  await page.getByRole('button', { name: 'ทดลองคำนวณ', exact: true }).click();
-  await page.getByRole('button', { name: 'เพิ่มรายการเข้าร่าง', exact: true }).click();
-  await page.getByLabel('แบบเสื้อ', { exact: true }).selectOption(configuredProduct);
-  await page.getByLabel('ไซซ์', { exact: true }).selectOption('L');
-  await page.getByLabel('เนื้อผ้า', { exact: true }).selectOption(firstFabric);
-  await page.getByLabel('จำนวนที่คิดเงิน', { exact: true }).fill('4');
-  for (const [label, name] of requiredComponentNames) {
-    const componentId = (await db.query('SELECT id FROM catalog_items WHERE name=$1', [name]))[0]
-      .id;
-    await page.getByLabel(label, { exact: true }).selectOption(componentId);
-  }
-  await page.getByRole('button', { name: 'ทดลองคำนวณ', exact: true }).click();
-  await page.getByRole('button', { name: 'เพิ่มรายการเข้าร่าง', exact: true }).click();
+  await page.getByRole('button', { name: /Add selected sizes/ }).click();
   await page.getByRole('checkbox', { name: 'ใช้ของแถมอัตโนมัติทั้งร่าง', exact: true }).check();
   await page.getByLabel('แถมรายการ 2', { exact: true }).fill('1');
   await page.getByLabel('ลดเปอร์เซ็นต์ทั้งร่าง', { exact: true }).fill('10');

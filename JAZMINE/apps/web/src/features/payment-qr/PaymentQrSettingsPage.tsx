@@ -57,6 +57,7 @@ function History({ currency }: { currency: PaymentQrCurrency }) {
   );
 }
 export function PaymentQrSettingsPage() {
+  const [saved, setSaved] = useState('');
   const [currency, setCurrency] = useState<PaymentQrCurrency>('LAK'),
     [settings, setSettings] = useState<PaymentQrView[]>([]),
     [tick, setTick] = useState(0),
@@ -96,12 +97,18 @@ export function PaymentQrSettingsPage() {
       </button>
       <button onClick={() => setTick((t) => t + 1)}>Reload bank QR settings</button>
       {error && <p role="alert">{error}</p>}
+      {saved && (
+        <p className="notice" role="status">
+          {saved}
+        </p>
+      )}
       {item ? (
         <>
           <SettingsForm
             key={currency + ':' + item.version}
             item={item}
-            onSaved={() => setTick((t) => t + 1)}
+            onReload={() => setTick((t) => t + 1)}
+            onSaved={() => setSaved(`ບັນທຶກ QR ${currency} ແລ້ວ / Payment QR saved (${currency}).`)}
           />
           <History key={currency + ':history:' + item.version} currency={currency} />
         </>

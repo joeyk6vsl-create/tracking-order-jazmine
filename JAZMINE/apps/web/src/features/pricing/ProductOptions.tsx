@@ -6,12 +6,14 @@ export function ProductOptions({
   fabric,
   onSize,
   onFabric,
+  showSizes = true,
 }: {
   choices: CatalogChoices | null;
   size: string;
   fabric: string;
   onSize: (value: string) => void;
   onFabric: (value: string) => void;
+  showSizes?: boolean;
 }) {
   return (
     <div className="product-options">
@@ -35,22 +37,24 @@ export function ProductOptions({
             ))}
         </div>
       </fieldset>
-      <fieldset>
-        <legend>Size</legend>
-        <div className="size-options">
-          {choices?.sizes.map((s) => (
-            <button
-              type="button"
-              key={s}
-              aria-pressed={size === s}
-              className={size === s ? 'selected-option' : ''}
-              onClick={() => onSize(s)}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </fieldset>
+      {showSizes && (
+        <fieldset>
+          <legend>Size</legend>
+          <div className="size-options">
+            {choices?.sizes.map((s) => (
+              <button
+                type="button"
+                key={s}
+                aria-pressed={size === s}
+                className={size === s ? 'selected-option' : ''}
+                onClick={() => onSize(s)}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      )}
       {!choices && <p>ເລືອກແບບເສື້ອກ່ອນ / Choose a product to see fabrics and sizes.</p>}
     </div>
   );

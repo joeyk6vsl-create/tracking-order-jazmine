@@ -2,7 +2,15 @@ import { useEffect, useState } from 'react';
 import type { PaymentQrView } from '../../../../../packages/contracts/src/payment-qr';
 import { api, errorMessage } from '../../services/api';
 import { useRecordedCommand } from '../../hooks/useRecordedCommand';
-export function SettingsForm({ item, onSaved }: { item: PaymentQrView; onSaved: () => void }) {
+export function SettingsForm({
+  item,
+  onSaved,
+  onReload,
+}: {
+  item: PaymentQrView;
+  onSaved: () => void;
+  onReload: () => void;
+}) {
   const [bankName, setBankName] = useState(item.reference?.bankName ?? ''),
     [receiverName, setReceiverName] = useState(item.reference?.receiverName ?? ''),
     [accountReference, setAccountReference] = useState(item.reference?.accountReference ?? ''),
@@ -17,6 +25,7 @@ export function SettingsForm({ item, onSaved }: { item: PaymentQrView; onSaved: 
     [error, setError] = useState(''),
     [inspecting, setInspecting] = useState(false),
     [frozen, setFrozen] = useState(false);
+  const [attempted, setAttempted] = useState(false);
   const [checks] = useState(() => ({ ticket: 0 }));
   useEffect(
     () => () => {
@@ -24,7 +33,7 @@ export function SettingsForm({ item, onSaved }: { item: PaymentQrView; onSaved: 
     },
     [checks],
   );
-  const command = useRecordedCommand(onSaved, setFrozen),
+  const command = useRecordedCommand(onReload, setFrozen),
     disabled = command.busy || frozen || inspecting;
   async function pick(file?: File) {
     if (!file) return;
@@ -104,6 +113,11 @@ export function SettingsForm({ item, onSaved }: { item: PaymentQrView; onSaved: 
         ໃຊ້ QR ຈາກທະນາຄານ ແບບໃຊ້ຊ້ຳ ແລະບໍ່ລັອກຍອດ / Upload a reusable bank merchant QR without a
         fixed amount. PNG/JPEG/WebP · 1 MB
       </p>
+      {(error || command.error) && (
+        <p className="alert error" role="alert">
+          {error || command.error}
+        </p>
+      )}
       <label>
         Bank QR image
         <input
@@ -131,20 +145,26 @@ export function SettingsForm({ item, onSaved }: { item: PaymentQrView; onSaved: 
         />
       )}
       <form
+        noValidate
         onSubmit={(e) => {
           e.preventDefault();
-          if (!preview) return;
-          void command.send('/payment-qr/' + item.currency, {
-            requestId: crypto.randomUUID(),
-            version: item.version,
-            bankName,
-            receiverName,
-            accountReference,
-            enabled,
-            verifiedInBankApp: verified,
-            reason,
-            ...(imageBase64 ? { imageBase64, filename } : {}),
-          });
+          setAttempted(true);
+          if (remaining.length) return;
+          void command.send(
+            '/payment-qr/' + item.currency,
+            {
+              requestId: crypto.randomUUID(),
+              version: item.version,
+              bankName,
+              receiverName,
+              accountReference,
+              enabled,
+              verifiedInBankApp: verified,
+              reason,
+              ...(imageBase64 ? { imageBase64, filename } : {}),
+            },
+            onSaved,
+          );
         }}
       >
         <fieldset disabled={disabled}>
@@ -221,14 +241,26 @@ export function SettingsForm({ item, onSaved }: { item: PaymentQrView; onSaved: 
               onChange={(e) => setReason(e.target.value)}
             />
           </label>
-          <button className="primary" disabled={remaining.length > 0}>
-            ບັນທຶກ / Save payment QR
-          </button>
+          {attempted && remaining.length > 0 && (
+            <div className="alert error" role="alert">
+              <p>ຍັງບັນທຶກບໍ່ໄດ້ / Complete these steps to save:</p>
+              <ul>
+                {remaining.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <button className="primary">ບັນທຶກ / Save payment QR</button>
         </fieldset>
       </form>
       {remaining.length > 0 && (
         <div className="notice payment-qr-steps">
-          <p>ກ່ອນບັນທຶກ / Before saving:</p>
+          <p>
+            {item.version > 0
+              ? 'ກ່ອນບັນທຶກການແກ້ໄຂ / Before saving another change:'
+              : 'ກ່ອນບັນທຶກ / Before saving:'}
+          </p>
           <ul aria-label="Payment QR steps">
             {remaining.map((step) => (
               <li key={step}>{step}</li>
@@ -236,7 +268,6 @@ export function SettingsForm({ item, onSaved }: { item: PaymentQrView; onSaved: 
           </ul>
         </div>
       )}
-      {(error || command.error) && <p role="alert">{error || command.error}</p>}
       {command.pending && (
         <button disabled={command.busy} onClick={command.retry}>
           Retry same bank QR request

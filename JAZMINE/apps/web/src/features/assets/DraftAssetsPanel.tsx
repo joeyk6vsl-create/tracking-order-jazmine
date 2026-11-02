@@ -7,6 +7,7 @@ import {
 } from '../../../../../packages/contracts/src/assets';
 import { api, errorMessage } from '../../services/api';
 import { useSession } from '../auth/SessionProvider';
+import { readArtworkFile } from './read-artwork-file';
 function UploadFile({
   draftId,
   kind,
@@ -25,19 +26,9 @@ function UploadFile({
     setError('');
     setUncertain(false);
     if (!value) return;
-    if (value.size > 2 * 1024 * 1024) {
-      setError('ไฟล์ต้องไม่เกิน 2 MB');
-      return;
-    }
     setBusy(true);
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result).split(',')[1]);
-        reader.onerror = () => reject(new Error('อ่านไฟล์ไม่ได้'));
-        reader.readAsDataURL(value);
-      });
-      setFile({ id: crypto.randomUUID(), filename: value.name, base64 });
+      setFile(await readArtworkFile(value));
     } catch (e) {
       setError(errorMessage(e));
     } finally {

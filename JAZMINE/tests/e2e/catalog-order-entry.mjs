@@ -115,10 +115,16 @@ try {
   const product = (await db.query("SELECT * FROM catalog_items WHERE name='TEST NEW SHIRT'"))[0];
   assert(Buffer.from(product.image_data.split(',')[1], 'base64').length <= 128 * 1024);
   const choices = page.locator('.choices-panel');
-  await choices.getByRole('button', { name: 'M', exact: true }).click();
+  await choices.getByRole('button', { name: 'Select all standard sizes', exact: true }).click();
   const fabric = (
     await db.query(
       "SELECT id,name FROM catalog_items WHERE kind='FABRIC' ORDER BY display_group,display_order,id LIMIT 1",
+    )
+  )[0];
+  const partFabric = (
+    await db.query(
+      "SELECT id,name FROM catalog_items WHERE kind='FABRIC' AND id<>$1 ORDER BY display_order,id LIMIT 1",
+      [fabric.id],
     )
   )[0];
   await choices.getByLabel(fabric.name, { exact: true }).check();
@@ -145,6 +151,9 @@ try {
   await page.getByText('ราคาเพิ่มส่วนประกอบเสื้อ', { exact: true }).click();
   for (const part of parts)
     await page.getByLabel('เพิ่มส่วนประกอบ ' + part.name, { exact: true }).fill('0');
+  await page.getByText('คิดเพิ่มค่าผ้าของแต่ละส่วนประกอบ', { exact: true }).click();
+  for (const part of parts)
+    await page.getByLabel('ค่าผ้าส่วนประกอบ ' + part.name, { exact: true }).selectOption('OFF');
   await page
     .getByLabel('เหตุผลที่เปลี่ยนราคา', { exact: true })
     .fill('TEST ONLY: explicit price setup');
@@ -162,6 +171,7 @@ try {
   )[0];
   await page.getByLabel('แบบเสื้อ', { exact: true }).selectOption(firstCollar.id);
   await page.getByText('ຕັ້ງຄ່າແບບນີ້ / Set up this product', { exact: true }).waitFor();
+  await page.getByText('ຕັ້ງຄ່າແບບນີ້ / Set up this product', { exact: true }).click();
   await page.setViewportSize({ width: 320, height: 900 });
   assert(
     await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
@@ -173,10 +183,9 @@ try {
     .locator('.choices-panel')
     .getByRole('button', { name: 'บันทึกไซซ์และผ้า', exact: true })
     .click();
-  await page.locator('.product-options').getByRole('button', { name: 'M', exact: true }).waitFor();
+  await page.getByLabel('Quantity M', { exact: true }).waitFor();
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByRole('button', { name: 'TEST NEW SHIRT', exact: true }).click();
-  await page.locator('.product-options').getByRole('button', { name: 'M', exact: true }).click();
   await page
     .locator('.product-options')
     .getByRole('button', { name: fabric.name, exact: true })
@@ -185,23 +194,62 @@ try {
     ['แขนเสื้อ', 'ແຂນ'],
     ['ปลายแขน', 'ປາຍແຂນ'],
     ['บ่าเสื้อ', 'ບ່າ'],
-  ])
+  ]) {
     await page
       .getByLabel(label, { exact: true })
       .selectOption(parts.find((p) => p.name.startsWith(prefix)).id);
-  assert.equal(await page.getByLabel('ไซซ์', { exact: true }).inputValue(), 'M');
-  assert.equal(await page.getByLabel('เนื้อผ้า', { exact: true }).inputValue(), fabric.id);
+    await page.getByRole('button', { name: 'Set fabrics: ' + label, exact: true }).click();
+    await page.locator('.choices-panel').getByLabel(partFabric.name, { exact: true }).check();
+    await page
+      .locator('.choices-panel')
+      .getByRole('button', { name: 'บันทึกไซซ์และผ้า', exact: true })
+      .click();
+    await page.getByLabel('ผ้าสำหรับ ' + label, { exact: true }).selectOption(partFabric.id);
+  }
+  await page.getByRole('button', { name: 'Increase M', exact: true }).click();
+  await page.getByRole('button', { name: 'Increase M', exact: true }).click();
+  await page.getByRole('button', { name: 'Decrease M', exact: true }).click();
+  assert.equal(await page.getByLabel('Quantity M', { exact: true }).inputValue(), '1');
+  await page.getByLabel('Quantity M', { exact: true }).fill('2');
+  await page.getByLabel('Quantity L', { exact: true }).fill('3');
+  await page.getByLabel('Quantity M', { exact: true }).fill('1.5');
+  await page.getByRole('button', { name: /Add selected sizes/ }).click();
+  await page
+    .getByRole('alert')
+    .getByText(/Quantities must be whole numbers/)
+    .waitFor();
+  assert.equal(await page.locator('.draft-line').count(), 0);
+  await page.getByLabel('Quantity M', { exact: true }).fill('2');
+  await page.getByText('ຂອງແຖມແຍກຕາມ Size / Gifts by size', { exact: true }).click();
+  await page.getByLabel('Gift quantity XL', { exact: true }).fill('1');
+  await page.getByRole('button', { name: /Check selected prices/ }).click();
+  await page
+    .locator('.size-quantity-table')
+    .getByText('110,000', { exact: true })
+    .first()
+    .waitFor();
   await page.setViewportSize({ width: 320, height: 900 });
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
   await page
-    .locator('.product-options')
-    .screenshot({ path: 'test-results/order-options-fixed-mobile.png' });
+    .locator('.size-quantity-panel')
+    .screenshot({ path: 'test-results/order-size-table-mobile.png' });
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.getByRole('button', { name: 'ทดลองคำนวณ', exact: true }).click();
-  await page.getByRole('button', { name: 'เพิ่มรายการเข้าร่าง', exact: true }).click();
+  await page.getByRole('button', { name: /Add selected sizes/ }).click();
   await page.getByLabel('ชื่อลูกค้าของร่าง', { exact: true }).fill('TEST CUSTOMER ONLY');
   await page.getByLabel('เบอร์ลูกค้าของร่าง', { exact: true }).fill('02055551234');
   await page.getByLabel('แบรนด์ของร่าง', { exact: true }).selectOption('JAZMINE_STANDARD');
+  await page
+    .getByLabel('Customer artwork', { exact: true })
+    .setInputFiles({ name: 'customer-shirt.png', mimeType: 'image/png', buffer: original });
+  await page.getByAltText('Customer artwork preview', { exact: true }).waitFor();
+  await page.getByLabel('เบอร์ลูกค้าของร่าง', { exact: true }).fill('12');
+  await page.getByRole('button', { name: 'บันทึกร่างออเดอร์', exact: true }).click();
+  await page
+    .getByRole('alert')
+    .getByText(/at least 6 digits/)
+    .waitFor();
+  assert.equal((await db.query('SELECT id FROM order_drafts')).length, 0);
+  await page.getByLabel('เบอร์ลูกค้าของร่าง', { exact: true }).fill('02055551234');
   for (const width of [390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     assert(
@@ -210,17 +258,68 @@ try {
     );
   }
   await page.screenshot({ path: 'test-results/order-entry-fixed-mobile.png', fullPage: true });
+  // Drop responses after each commit: retry must preserve both draft version and artwork ID.
+  let droppedDraft = false,
+    droppedArtwork = false;
+  await page.route('**/api/v1/order-drafts/*', async (route) => {
+    if (route.request().method() === 'PUT' && !droppedDraft) {
+      droppedDraft = true;
+      const response = await route.fetch();
+      assert.equal(response.status(), 200);
+      await route.abort('failed');
+    } else await route.continue();
+  });
+  await page.route('**/api/v1/graphic-assets/*', async (route) => {
+    if (route.request().method() === 'PUT' && !droppedArtwork) {
+      droppedArtwork = true;
+      const response = await route.fetch();
+      assert.equal(response.status(), 200);
+      await route.abort('failed');
+    } else await route.continue();
+  });
   await page.getByRole('button', { name: 'บันทึกร่างออเดอร์', exact: true }).click();
+  await page.getByRole('button', { name: /Retry draft and artwork/ }).click();
+  await page.getByText(/Draft saved; artwork upload is not yet confirmed/).waitFor();
+  await page.getByRole('button', { name: /Retry draft and artwork/ }).click();
   await page.getByRole('heading', { name: 'บันทึกร่างแล้ว', exact: true }).waitFor();
-  const draft = (await db.query('SELECT id FROM order_drafts'))[0];
+  const draft = (
+    await db.query('SELECT id,row_version,input_json,quote_json FROM order_drafts')
+  )[0];
+  assert.equal(Number(draft.row_version), 1);
+  assert.equal(draft.input_json.lines.length, 3);
+  assert.deepEqual(
+    draft.input_json.lines.map((l) => [l.size, l.quantity, l.freeQuantity]),
+    [
+      ['M', 2, 0],
+      ['L', 3, 0],
+      ['XL', 0, 1],
+    ],
+  );
+  assert(
+    draft.input_json.lines.every(
+      (l) => l.parts.length === 3 && l.parts.every((p) => p.fabricId === partFabric.id),
+    ),
+  );
+  assert.equal(draft.quote_json.productionQuantity, 6);
+  const uploaded = await db.query("SELECT id,status FROM graphic_assets WHERE kind='MOCKUP'");
+  assert.equal(uploaded.length, 1);
+  assert.equal(uploaded[0].status, 'PENDING');
   assert.equal((await db.query('SELECT * FROM customers')).length, 0);
   // Required artwork/availability are set in the isolated fixture only; confirmation still checks them.
-  await db.query("UPDATE catalog_items SET availability='AVAILABLE' WHERE id=$1", [fabric.id]);
+  await db.query("UPDATE catalog_items SET availability='AVAILABLE' WHERE id=ANY($1::uuid[])", [
+    [fabric.id, partFabric.id],
+  ]);
   const assets = new AssetService(db),
     png = await sharp({ create: { width: 20, height: 20, channels: 3, background: '#fff' } })
       .png()
       .toBuffer();
-  for (const kind of ['NECK_LABEL', 'NECK_TAPE', 'MOCKUP']) {
+  await assets.review(
+    login.user,
+    uploaded[0].id,
+    'APPROVED',
+    'TEST ONLY: customer artwork reviewed',
+  );
+  for (const kind of ['NECK_LABEL', 'NECK_TAPE']) {
     const id = randomUUID();
     await assets.upload(login.user, id, {
       draftId: draft.id,
@@ -249,7 +348,12 @@ try {
   await page.getByLabel('Payment QR account reference').fill(bank.input.accountReference);
   await page.getByLabel('Enable payment QR on new invoices').check();
   await page.getByLabel('Payment QR change reason').fill('TEST ONLY');
-  assert(await page.getByRole('button', { name: /Save payment QR/ }).isDisabled());
+  await page.getByRole('button', { name: /Save payment QR/ }).click();
+  await page
+    .getByRole('alert')
+    .getByText(/Complete these steps to save/)
+    .waitFor();
+  assert.equal((await db.query('SELECT * FROM payment_qr_versions')).length, 0);
   await page
     .getByLabel('Payment QR steps')
     .getByText(/Check the preview in the bank app/)
@@ -258,6 +362,10 @@ try {
   assert(!(await page.getByRole('button', { name: /Save payment QR/ }).isDisabled()));
   await page.getByRole('button', { name: /Save payment QR/ }).click();
   await page.getByRole('heading', { name: /LAK.*v1/ }).waitFor();
+  await page
+    .getByRole('status')
+    .getByText(/Payment QR saved \(LAK\)/)
+    .waitFor();
   for (const width of [390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     assert(
@@ -271,7 +379,7 @@ try {
   });
   assert.deepEqual(errors, []);
   console.log(
-    'PASS: fresh catalog -> optional image/text card -> explicit sizes/fabrics/prices -> buttons -> saved draft -> confirmed real order number; QR auto-check and visible save requirements; 320/390 px; isolated test data only.',
+    'PASS: fresh catalog -> explicit sizes/fabrics/prices -> multi-size quantity table and part fabrics -> staged customer artwork -> draft/upload lost-response retries without duplicates -> confirmed order; invalid quantities/phone rejected; QR actionable validation and saved feedback; 320/390 px; isolated test data only.',
   );
 } catch (e) {
   if (page) {

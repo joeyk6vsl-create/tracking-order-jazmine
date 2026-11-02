@@ -5,8 +5,6 @@ import {
   SIZES,
   type PricingView,
   type QuoteResult,
-  type PricingQuote,
-  quoteSchema,
 } from '../../../../../packages/contracts/src/pricing';
 import type { CatalogItem } from '../../../../../packages/contracts/src/catalog';
 import type { CatalogChoices } from '../../../../../packages/contracts/src/catalog-choices';
@@ -14,20 +12,11 @@ import { api, errorMessage } from '../../services/api';
 import { useSession } from '../auth/SessionProvider';
 import { PricingExtras } from './PricingExtras';
 import { QuoteParts } from './QuoteParts';
-import { ProductPicker } from './ProductPicker';
 import { ProductOptions } from './ProductOptions';
 import { ProductPriceGroups } from './ProductPriceGroups';
 import { CatalogChoicesForm } from '../catalog/CatalogChoicesForm';
 
-export function PricingPage({
-  onSaveDraft,
-  initialGroup = 'RETAIL',
-  lineMode = false,
-}: {
-  onSaveDraft?: (quote: PricingQuote) => Promise<void>;
-  initialGroup?: string;
-  lineMode?: boolean;
-}) {
+export function PricingPage() {
   const { session } = useSession(),
     owner = session!.permissions.includes('users.manage');
   const [view, setView] = useState<PricingView | null>(null),
@@ -39,7 +28,7 @@ export function PricingPage({
     [choices, setChoices] = useState<CatalogChoices | null>(null),
     [size, setSize] = useState(''),
     [fabric, setFabric] = useState(''),
-    [group, setGroup] = useState(initialGroup),
+    [group, setGroup] = useState('RETAIL'),
     [quantity, setQuantity] = useState('1'),
     [free, setFree] = useState('0'),
     [percent, setPercent] = useState('0'),
@@ -48,32 +37,6 @@ export function PricingPage({
   const [parts, setParts] = useState<{ componentId: string; fabricId?: string }[]>([]);
   const [currency, setCurrency] = useState('LAK');
   const [applyBuyGet, setApplyBuyGet] = useState(false);
-  function currentInput() {
-    return quoteSchema.parse({
-      productId: product,
-      fabricId: fabric,
-      size,
-      group,
-      quantity: Number(quantity),
-      freeQuantity: Number(free),
-      percent: lineMode ? 0 : Number(percent),
-      fixed: lineMode ? 0 : Number(fixed),
-      parts,
-      currency,
-      applyBuyGet: lineMode ? false : applyBuyGet,
-    });
-  }
-  async function saveDraft() {
-    setBusy(true);
-    setError('');
-    try {
-      await onSaveDraft!(currentInput());
-    } catch (e) {
-      setError(errorMessage(e));
-    } finally {
-      setBusy(false);
-    }
-  }
   useEffect(() => {
     let alive = true;
     void Promise.all([
@@ -138,9 +101,9 @@ export function PricingPage({
           group,
           quantity: Number(quantity),
           freeQuantity: Number(free),
-          applyBuyGet: lineMode ? false : applyBuyGet,
-          percent: lineMode ? 0 : Number(percent),
-          fixed: lineMode ? 0 : Number(fixed),
+          applyBuyGet: applyBuyGet,
+          percent: Number(percent),
+          fixed: Number(fixed),
           parts,
           currency,
         }),
@@ -167,37 +130,75 @@ export function PricingPage({
           {error}
         </p>
       )}
-      {!onSaveDraft && (
-        <section className="panel pricing-panel">
-          <h2>ราคาพื้นฐานตามกลุ่มคอเสื้อ</h2>
-          <p className="muted">บนมือถือเลื่อนตารางไปด้านข้างเพื่อดูราคาให้ครบทุกกลุ่ม</p>
-          <p>ระดับตัวแทน 4 ราคาต่ำกว่าระดับ 3 ตามเอกสาร · กลุ่มราคาแยกจากลำดับรูป</p>
+      <section className="panel pricing-panel">
+        <h2>ราคาพื้นฐานตามกลุ่มคอเสื้อ</h2>
+        <p className="muted">บนมือถือเลื่อนตารางไปด้านข้างเพื่อดูราคาให้ครบทุกกลุ่ม</p>
+        <p>ระดับตัวแทน 4 ราคาต่ำกว่าระดับ 3 ตามเอกสาร · กลุ่มราคาแยกจากลำดับรูป</p>
+        <div className="pricing-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>กลุ่มลูกค้า</th>
+                {PRICE_GROUPS.map((g) => (
+                  <th key={g}>{g}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {CUSTOMER_GROUPS.map((g) => (
+                <tr key={g}>
+                  <th>{g === 'RETAIL' ? 'ขายปลีก' : `ตัวแทน ${g.at(-1)}`}</th>
+                  {view.config.base[g].map((amount, index) => (
+                    <td key={index}>
+                      <input
+                        aria-label={`ราคา ${g} ${PRICE_GROUPS[index]}`}
+                        type="number"
+                        min="0"
+                        max="100000000"
+                        disabled={!owner || busy}
+                        value={amount}
+                        onChange={(e) => {
+                          const next = structuredClone(view);
+                          next.config.base[g][index] = Number(e.target.value);
+                          setView(next);
+                          setResult(null);
+                        }}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <details>
+          <summary>ดูและแก้ราคาเพิ่มตามไซซ์</summary>
           <div className="pricing-scroll">
             <table>
               <thead>
                 <tr>
-                  <th>กลุ่มลูกค้า</th>
-                  {PRICE_GROUPS.map((g) => (
-                    <th key={g}>{g}</th>
+                  <th>ไซซ์</th>
+                  {CUSTOMER_GROUPS.map((g) => (
+                    <th key={g}>{g === 'RETAIL' ? 'ขายปลีก' : `ตัวแทน ${g.at(-1)}`}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {CUSTOMER_GROUPS.map((g) => (
-                  <tr key={g}>
-                    <th>{g === 'RETAIL' ? 'ขายปลีก' : `ตัวแทน ${g.at(-1)}`}</th>
-                    {view.config.base[g].map((amount, index) => (
-                      <td key={index}>
+                {SIZES.map((s) => (
+                  <tr key={s}>
+                    <th>{s}</th>
+                    {CUSTOMER_GROUPS.map((g) => (
+                      <td key={g}>
                         <input
-                          aria-label={`ราคา ${g} ${PRICE_GROUPS[index]}`}
+                          aria-label={`เพิ่มไซซ์ ${g} ${s}`}
                           type="number"
                           min="0"
                           max="100000000"
                           disabled={!owner || busy}
-                          value={amount}
+                          value={view.config.size[g][s]}
                           onChange={(e) => {
                             const next = structuredClone(view);
-                            next.config.base[g][index] = Number(e.target.value);
+                            next.config.size[g][s] = Number(e.target.value);
                             setView(next);
                             setResult(null);
                           }}
@@ -209,117 +210,77 @@ export function PricingPage({
               </tbody>
             </table>
           </div>
-          <details>
-            <summary>ดูและแก้ราคาเพิ่มตามไซซ์</summary>
-            <div className="pricing-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ไซซ์</th>
-                    {CUSTOMER_GROUPS.map((g) => (
-                      <th key={g}>{g === 'RETAIL' ? 'ขายปลีก' : `ตัวแทน ${g.at(-1)}`}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {SIZES.map((s) => (
-                    <tr key={s}>
-                      <th>{s}</th>
-                      {CUSTOMER_GROUPS.map((g) => (
-                        <td key={g}>
-                          <input
-                            aria-label={`เพิ่มไซซ์ ${g} ${s}`}
-                            type="number"
-                            min="0"
-                            max="100000000"
-                            disabled={!owner || busy}
-                            value={view.config.size[g][s]}
-                            onChange={(e) => {
-                              const next = structuredClone(view);
-                              next.config.size[g][s] = Number(e.target.value);
-                              setView(next);
-                              setResult(null);
-                            }}
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </details>
-          <details>
-            <summary>ราคาเพิ่มของผ้า — ยังไม่มีราคาในเอกสาร</summary>
-            <p>ว่าง = ยังไม่กำหนด · 0 = เจ้าของยืนยันว่าไม่คิดเพิ่ม</p>
-            <div className="pricing-fields">
-              {items
-                .filter((i) => i.kind === 'FABRIC')
-                .map((f) => (
-                  <label key={f.id}>
-                    {f.name}
-                    <input
-                      aria-label={`เพิ่มผ้า ${f.name}`}
-                      type="number"
-                      min="0"
-                      max="100000000"
-                      disabled={!owner || busy}
-                      value={view.config.adjustments[f.id] ?? ''}
-                      onChange={(e) => {
-                        const next = structuredClone(view);
-                        if (e.target.value === '') delete next.config.adjustments[f.id];
-                        else next.config.adjustments[f.id] = Number(e.target.value);
-                        setView(next);
-                        setResult(null);
-                      }}
-                    />
-                  </label>
-                ))}
-            </div>
-          </details>
-          <ProductPriceGroups
-            items={items}
-            config={view.config}
-            disabled={!owner || busy}
-            onChange={(config) => {
-              setView({ ...view, config });
-              setResult(null);
+        </details>
+        <details>
+          <summary>ราคาเพิ่มของผ้า — ยังไม่มีราคาในเอกสาร</summary>
+          <p>ว่าง = ยังไม่กำหนด · 0 = เจ้าของยืนยันว่าไม่คิดเพิ่ม</p>
+          <div className="pricing-fields">
+            {items
+              .filter((i) => i.kind === 'FABRIC')
+              .map((f) => (
+                <label key={f.id}>
+                  {f.name}
+                  <input
+                    aria-label={`เพิ่มผ้า ${f.name}`}
+                    type="number"
+                    min="0"
+                    max="100000000"
+                    disabled={!owner || busy}
+                    value={view.config.adjustments[f.id] ?? ''}
+                    onChange={(e) => {
+                      const next = structuredClone(view);
+                      if (e.target.value === '') delete next.config.adjustments[f.id];
+                      else next.config.adjustments[f.id] = Number(e.target.value);
+                      setView(next);
+                      setResult(null);
+                    }}
+                  />
+                </label>
+              ))}
+          </div>
+        </details>
+        <ProductPriceGroups
+          items={items}
+          config={view.config}
+          disabled={!owner || busy}
+          onChange={(config) => {
+            setView({ ...view, config });
+            setResult(null);
+          }}
+        />
+        <PricingExtras
+          items={items}
+          config={view.config}
+          disabled={!owner || busy}
+          onChange={(config) => {
+            setView({ ...view, config });
+            setResult(null);
+          }}
+        />
+        {owner && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void save();
             }}
-          />
-          <PricingExtras
-            items={items}
-            config={view.config}
-            disabled={!owner || busy}
-            onChange={(config) => {
-              setView({ ...view, config });
-              setResult(null);
-            }}
-          />
-          {owner && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                void save();
-              }}
-            >
-              <label>
-                เหตุผลที่เปลี่ยนราคา
-                <input
-                  required
-                  maxLength={500}
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                />
-              </label>
-              <button className="primary" disabled={busy}>
-                บันทึกเป็นราคาฉบับใหม่
-              </button>
-            </form>
-          )}
-        </section>
-      )}
+          >
+            <label>
+              เหตุผลที่เปลี่ยนราคา
+              <input
+                required
+                maxLength={500}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+            </label>
+            <button className="primary" disabled={busy}>
+              บันทึกเป็นราคาฉบับใหม่
+            </button>
+          </form>
+        )}
+      </section>
       <section className="panel pricing-panel">
-        <h2>{onSaveDraft ? 'รายการในร่างและคำนวณราคา' : 'ทดลองราคาตัวเสื้อและผ้า'}</h2>
+        <h2>ทดลองราคาตัวเสื้อและผ้า</h2>
         <p>
           คำนวณด้วยราคาฉบับที่บันทึกแล้ว รวมเฉพาะส่วนประกอบที่เลือก
           ยังไม่สร้างออเดอร์หรือบันทึกรับเงินจริง
@@ -356,26 +317,21 @@ export function PricingPage({
           onChange={() => setResult(null)}
         >
           <fieldset disabled={busy}>
-            {onSaveDraft && (
-              <ProductPicker items={items} value={product} onSelect={(id) => void choose(id)} />
-            )}
-            {!lineMode && (
-              <label>
-                <input
-                  type="checkbox"
-                  checked={applyBuyGet}
-                  disabled={!view.config.buyGet}
-                  onChange={(e) => {
-                    setApplyBuyGet(e.target.checked);
-                    setFree('0');
-                  }}
-                />{' '}
-                ใช้ของแถมอัตโนมัติ{' '}
-                {view.config.buyGet
-                  ? `ซื้อ ${view.config.buyGet.buy} แถม ${view.config.buyGet.get}`
-                  : '(เจ้าของยังไม่กำหนด)'}
-              </label>
-            )}
+            <label>
+              <input
+                type="checkbox"
+                checked={applyBuyGet}
+                disabled={!view.config.buyGet}
+                onChange={(e) => {
+                  setApplyBuyGet(e.target.checked);
+                  setFree('0');
+                }}
+              />{' '}
+              ใช้ของแถมอัตโนมัติ{' '}
+              {view.config.buyGet
+                ? `ซื้อ ${view.config.buyGet.buy} แถม ${view.config.buyGet.get}`
+                : '(เจ้าของยังไม่กำหนด)'}
+            </label>
             <ProductOptions
               choices={choices}
               size={size}
@@ -479,22 +435,20 @@ export function PricingPage({
                   : []),
                 { label: 'ลดเปอร์เซ็นต์', value: percent, set: setPercent, min: 0, max: 1000000 },
                 { label: 'ลดจำนวนเงิน (กีบ)', value: fixed, set: setFixed, min: 0, max: 100000000 },
-              ]
-                .filter((f) => !lineMode || !f.label.startsWith('ลด'))
-                .map((f) => (
-                  <label key={f.label}>
-                    {f.label}
-                    <input
-                      required
-                      type="number"
-                      min={f.min}
-                      max={f.max}
-                      step={f.label === 'ลดเปอร์เซ็นต์' ? '0.01' : '1'}
-                      value={f.value}
-                      onChange={(e) => f.set(e.target.value)}
-                    />
-                  </label>
-                ))}
+              ].map((f) => (
+                <label key={f.label}>
+                  {f.label}
+                  <input
+                    required
+                    type="number"
+                    min={f.min}
+                    max={f.max}
+                    step={f.label === 'ลดเปอร์เซ็นต์' ? '0.01' : '1'}
+                    value={f.value}
+                    onChange={(e) => f.set(e.target.value)}
+                  />
+                </label>
+              ))}
             </div>
           </fieldset>
           {choices && (!choices.sizes.length || !choices.fabricIds.length) && (
@@ -508,11 +462,6 @@ export function PricingPage({
           ແຖມລ້ວນ / Gift-only: ຈຳນວນຄິດເງິນ 0 ແລະໃສ່ຈຳນວນແຖມ / Set paid quantity to 0 and enter
           gifts. Gifts still count for production and delivery.
         </p>
-        {onSaveDraft && (
-          <button className="primary" disabled={busy || !result} onClick={() => void saveDraft()}>
-            {lineMode ? 'เพิ่มรายการเข้าร่าง' : 'บันทึกร่างออเดอร์'}
-          </button>
-        )}
         {result && (
           <div role="status" className="notice">
             <div>

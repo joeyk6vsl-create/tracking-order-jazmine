@@ -3,11 +3,7 @@ import {
   CUSTOMER_GROUPS,
   type CustomerView,
 } from '../../../../../packages/contracts/src/customers';
-import {
-  SIZES,
-  type PricingQuote,
-  type PricingView,
-} from '../../../../../packages/contracts/src/pricing';
+import { type PricingQuote, type PricingView } from '../../../../../packages/contracts/src/pricing';
 import {
   draftSchema,
   type DraftView,
@@ -15,7 +11,11 @@ import {
 } from '../../../../../packages/contracts/src/orders';
 import type { CatalogItem } from '../../../../../packages/contracts/src/catalog';
 import { api, errorMessage } from '../../services/api';
-import { PricingPage } from '../pricing/PricingPage';
+import { DraftLines } from './DraftLines';
+import { OrderItemComposer } from './OrderItemComposer';
+import { CustomerArtworkPicker } from '../assets/CustomerArtworkPicker';
+import type { ArtworkFile } from '../assets/read-artwork-file';
+import { useSaveDraftWithArtwork } from './useSaveDraftWithArtwork';
 export function DraftEditor({
   draft,
   onSaved,
@@ -58,6 +58,10 @@ export function DraftEditor({
     [error, setError] = useState(''),
     [busy, setBusy] = useState(false),
     [lineKey, setLineKey] = useState(0);
+  const [artwork, setArtwork] = useState<ArtworkFile | null>(null),
+    [readingArtwork, setReadingArtwork] = useState(false);
+  const saving = useSaveDraftWithArtwork(id, onSaved);
+  const locked = busy || saving.busy || saving.locked || readingArtwork;
   useEffect(() => {
     let alive = true;
     void Promise.all([
@@ -104,8 +108,15 @@ export function DraftEditor({
       brandingType: brand || null,
       assetNotes: notes,
     });
-    if (!parsed.success)
+    if (!parsed.success) {
+      if (parsed.error.issues.some((issue) => issue.path[0] === 'customerName'))
+        throw new Error('ກອກຊື່ລູກຄ້າ / Enter the customer name.');
+      if (parsed.error.issues.some((issue) => issue.path[0] === 'phone'))
+        throw new Error(
+          'ກອກເບີລູກຄ້າຢ່າງໜ້ອຍ 6 ຫຼັກ / Enter a customer phone number with at least 6 digits.',
+        );
       throw new Error('กรุณาตรวจชื่อ เบอร์ลูกค้า จำนวนซื้อและแถม ส่วนลด และเหตุผลให้ครบถ้วน');
+    }
     return parsed.data;
   }
   async function find() {
@@ -135,14 +146,11 @@ export function DraftEditor({
     }
   }
   async function save() {
-    setBusy(true);
     setError('');
     try {
-      onSaved((await api<{ draft: DraftView }>(`/order-drafts/${id}`, 'PUT', payload())).draft);
+      await saving.save(payload(), artwork);
     } catch (e) {
       setError(errorMessage(e));
-    } finally {
-      setBusy(false);
     }
   }
   function changeLine(index: number, patch: Partial<PricingQuote>) {
@@ -160,7 +168,29 @@ export function DraftEditor({
           {error}
         </p>
       )}
-      <fieldset disabled={busy} className="draft-fields">
+      {saving.error && (
+        <div className="alert error" role="alert">
+          <p>{saving.error}</p>
+          {saving.locked && (
+            <>
+              <p>
+                {saving.savedDraft
+                  ? 'ຮ່າງບັນທຶກແລ້ວ ແຕ່ຍັງຢືນຢັນການສົ່ງຮູບບໍ່ໄດ້ / Draft saved; artwork upload is not yet confirmed.'
+                  : 'ກວດຄຳຂໍເດີມກ່ອນ / Check the same request before making changes.'}
+              </p>
+              <button disabled={saving.busy} onClick={saving.retry}>
+                ລອງຄຳຂໍເດີມ / Retry draft and artwork
+              </button>
+              {saving.savedDraft && (
+                <button disabled={saving.busy} onClick={saving.openSaved}>
+                  ເປີດຮ່າງເພື່ອກວດຮູບ / Open saved draft and check artwork
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
+      <fieldset disabled={locked} className="draft-fields">
         <section className="panel">
           <h2>ลูกค้าของงานนี้</h2>
           <p>ขาจรกรอกตรงนี้ได้ ไม่เพิ่มเป็นลูกค้าประจำอัตโนมัติ</p>
@@ -229,104 +259,37 @@ export function DraftEditor({
           <p>
             ป้ายคอ เทปคอ และแบบที่อนุมัติ ยังต้องแนบและตรวจจริง การเขียนหมายเหตุไม่ทำให้ไฟล์ผ่าน
           </p>
+          <CustomerArtworkPicker file={artwork} onChange={setArtwork} onBusy={setReadingArtwork} />
         </section>
+        <details className="panel pricing-panel" open>
+          <summary>ເລືອກເສື້ອ, ຜ້າ ແລະຈຳນວນ / Add shirt sizes</summary>
+          <p>ເລືອກແບບ ແລະຜ້າ → ໃສ່ຈຳນວນແຕ່ລະ Size → ກົດ Add selected sizes → ບັນທຶກຮ່າງ</p>
+          <OrderItemComposer
+            key={lineKey}
+            items={items}
+            group={group}
+            currency={currency}
+            disabled={locked}
+            remainingLines={30 - lines.length}
+            onAdd={(added) => {
+              setLines((rows) => [...rows, ...added]);
+              setResult(null);
+              setLineKey((k) => k + 1);
+            }}
+          />
+        </details>
         <section className="panel pricing-panel">
           <h2>รายการในร่าง</h2>
-          {!lines.length && <p>ยังไม่มีรายการ เพิ่มจากตัวเลือกด้านล่าง</p>}
-          {lines.map((line, index) => (
-            <div className="draft-line" key={index}>
-              <h3>
-                รายการ {index + 1} ·{' '}
-                {items.find((i) => i.id === line.productId)?.name ?? 'แบบเสื้อที่บันทึกไว้'}
-              </h3>
-              <p>
-                ผ้า {items.find((i) => i.id === line.fabricId)?.name ?? line.fabricId} · ส่วนประกอบ{' '}
-                {line.parts.length} แบบ
-              </p>
-              <div className="pricing-fields">
-                <label>
-                  ไซซ์รายการ {index + 1}
-                  <select
-                    aria-label={`ไซซ์รายการ ${index + 1}`}
-                    value={line.size}
-                    onChange={(e) =>
-                      changeLine(index, { size: e.target.value as PricingQuote['size'] })
-                    }
-                  >
-                    {SIZES.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  จำนวนซื้อรายการ {index + 1}
-                  <input
-                    aria-label={`จำนวนซื้อรายการ ${index + 1}`}
-                    type="number"
-                    min="0"
-                    max="10000"
-                    value={line.quantity}
-                    onChange={(e) => changeLine(index, { quantity: Number(e.target.value) })}
-                  />
-                </label>
-                <label>
-                  แถมรายการ {index + 1}
-                  <input
-                    aria-label={`แถมรายการ ${index + 1}`}
-                    type="number"
-                    min="0"
-                    max="10000"
-                    value={line.freeQuantity}
-                    onChange={(e) => changeLine(index, { freeQuantity: Number(e.target.value) })}
-                  />
-                </label>
-              </div>
-              {line.quantity === 0 && line.freeQuantity > 0 && (
-                <p>
-                  ລາຍການແຖມລ້ວນ / Gift-only · ບໍ່ຄິດເງິນ ແຕ່ຕ້ອງຜະລິດ ແລະສົ່ງ / No charge;
-                  production and delivery required
-                </p>
-              )}
-              {line.quantity === 0 && line.freeQuantity === 0 && (
-                <p className="alert warning">
-                  ໃສ່ຈຳນວນແຖມ ຫຼືຊື້ ຫຼືນຳລາຍການອອກ / Enter a gift or purchased quantity, or remove
-                  this line
-                </p>
-              )}
-              <button
-                type="button"
-                aria-label={`Make line ${index + 1} gift-only`}
-                disabled={line.quantity === 0 || line.quantity + line.freeQuantity > 10000}
-                onClick={() =>
-                  changeLine(index, {
-                    quantity: 0,
-                    freeQuantity: line.quantity + line.freeQuantity,
-                  })
-                }
-              >
-                ປ່ຽນເປັນແຖມລ້ວນ / Make gift-only
-              </button>
-              {line.quantity === 0 && line.freeQuantity > 0 && (
-                <button
-                  type="button"
-                  aria-label={`Make line ${index + 1} paid`}
-                  onClick={() =>
-                    changeLine(index, { quantity: line.freeQuantity, freeQuantity: 0 })
-                  }
-                >
-                  ປ່ຽນເປັນຄິດເງິນ / Make paid
-                </button>
-              )}
-              <button
-                onClick={() => {
-                  setLines((rows) => rows.filter((_, i) => i !== index));
-                  setResult(null);
-                }}
-              >
-                นำรายการ {index + 1} ออก
-              </button>
-            </div>
-          ))}
+          {!lines.length && <p>ຍັງບໍ່ມີລາຍການ / Add selected sizes from the table above.</p>}
+          <DraftLines
+            lines={lines}
+            items={items}
+            onChange={changeLine}
+            onRemove={(index) => {
+              setLines((rows) => rows.filter((_, i) => i !== index));
+              setResult(null);
+            }}
+          />
           <div className="pricing-fields">
             <label>
               กลุ่มราคาทั้งร่าง
@@ -432,6 +395,16 @@ export function DraftEditor({
           >
             บันทึกร่างออเดอร์
           </button>
+          {!lines.length && (
+            <p role="status">
+              ໃສ່ຈຳນວນ ແລ້ວກົດ Add selected sizes ກ່ອນບັນທຶກ / Add the selected sizes above before
+              saving.
+            </p>
+          )}
+          <p>
+            ບັນທຶກແລ້ວຈະເປີດຮ່າງ ເພື່ອກວດລາຄາ, ໄຟລ໌ ແລະຢືນຢັນອໍເດີ / Save the draft, then review and
+            confirm the order.
+          </p>
           {result && (
             <div role="status">
               <p>
@@ -448,25 +421,6 @@ export function DraftEditor({
           )}
         </section>
       </fieldset>
-      <details className="panel pricing-panel" open>
-        <summary>เพิ่มแบบเสื้อหรือไซซ์ใหม่เข้าร่าง</summary>
-        <p>
-          ส่วนลด กลุ่มราคา สกุลเงิน และสิทธิ์แถมใช้ค่าที่หัวข้อยอดรวมร่างเพียงครั้งเดียว
-          เพิ่มได้สูงสุด 30 รายการ ถ้าจะเปลี่ยนแบบ ผ้า หรือส่วนประกอบ
-          ให้นำรายการเดิมออกแล้วเพิ่มใหม่
-        </p>
-        <PricingPage
-          key={lineKey}
-          initialGroup={group}
-          lineMode
-          onSaveDraft={async (line) => {
-            if (lines.length >= 30) throw new Error('ร่างนี้มีครบ 30 รายการแล้ว');
-            setLines((rows) => [...rows, line]);
-            setResult(null);
-            setLineKey((k) => k + 1);
-          }}
-        />
-      </details>
     </div>
   );
 }
