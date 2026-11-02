@@ -1,0 +1,46 @@
+.stored-document {
+  border: 1px solid #dce5ed;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 18px 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  background: #f7fafc;
+  color: #153149;
+}
+.stored-document button {
+  max-width: 100%;
+  white-space: normal;
+}
+.document-current-status {
+  border: 1px solid #c08429;
+  background: #fff8e7;
+  color: #653f09;
+  padding: 12px;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+  break-inside: avoid;
+}
+.document-current-status p {
+  margin: 4px 0 0;
+}
+@media print {
+  .document-current-status {
+    font-size: 10pt;
+    background: white;
+    padding: 6pt;
+  }
+}
+.stored-document-download {
+  display: inline-block;
+  padding: 10px 14px;
+  background: #1453c4;
+  border-radius: 8px;
+  color: white;
+  text-decoration: none;
+}
+@media print {
+  .stored-document {
+    display: none !important;
+  }
+}

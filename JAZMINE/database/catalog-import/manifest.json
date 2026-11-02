@@ -1,0 +1,380 @@
+[
+  {
+    "group": 1,
+    "section": "COLLAR",
+    "key": "pic/1/ຄໍຄາງໝູ.png",
+    "kind": "PRODUCT",
+    "file": "image-1-1.png",
+    "position": 1,
+    "name": "ຄໍຄາງໝູ"
+  },
+  {
+    "group": 1,
+    "section": "COLLAR",
+    "key": "pic/1/ຄໍຄາງໝູໄຂ່ວ.png",
+    "kind": "PRODUCT",
+    "file": "image-1-2.png",
+    "position": 2,
+    "name": "ຄໍຄາງໝູໄຂ່ວ"
+  },
+  {
+    "group": 1,
+    "section": "COLLAR",
+    "key": "pic/1/ຄໍຄາງໝູປາຍແຫຼມ.png",
+    "kind": "PRODUCT",
+    "file": "image-1-3.png",
+    "position": 3,
+    "name": "ຄໍຄາງໝູປາຍແຫຼມ"
+  },
+  {
+    "group": 1,
+    "section": "COLLAR",
+    "key": "pic/1/ຄໍມົນ.png",
+    "kind": "PRODUCT",
+    "file": "image-1-4.png",
+    "position": 4,
+    "name": "ຄໍມົນ"
+  },
+  {
+    "group": 1,
+    "section": "COLLAR",
+    "key": "pic/1/ຄໍມົນຕໍ່.png",
+    "kind": "PRODUCT",
+    "file": "image-1-5.png",
+    "position": 5,
+    "name": "ຄໍມົນຕໍ່"
+  },
+  {
+    "group": 1,
+    "section": "COLLAR",
+    "key": "pic/1/ຄໍວີ.png",
+    "kind": "PRODUCT",
+    "file": "image-1-6.png",
+    "position": 6,
+    "name": "ຄໍວີ"
+  },
+  {
+    "group": 1,
+    "section": "COLLAR",
+    "key": "pic/1/ຄໍວີໄຂ່ວ.png",
+    "kind": "PRODUCT",
+    "file": "image-1-7.png",
+    "position": 7,
+    "name": "ຄໍວີໄຂ່ວ"
+  },
+  {
+    "group": 2,
+    "section": "COLLAR",
+    "key": "pic/2/ຄໍ5ຫຼ່ຽມ.png",
+    "kind": "PRODUCT",
+    "file": "image-2-1.png",
+    "position": 1,
+    "name": "ຄໍ5ຫຼ່ຽມ"
+  },
+  {
+    "group": 2,
+    "section": "COLLAR",
+    "key": "pic/2/ຄໍ5ຫຼ່ຽມມີລີ້ນ.png",
+    "kind": "PRODUCT",
+    "file": "image-2-2.png",
+    "position": 2,
+    "name": "ຄໍ5ຫຼ່ຽມມີລີ້ນ"
+  },
+  {
+    "group": 2,
+    "section": "COLLAR",
+    "key": "pic/2/ຄໍຄາງໝູສາບ.png",
+    "kind": "PRODUCT",
+    "file": "image-2-3.png",
+    "position": 3,
+    "name": "ຄໍຄາງໝູສາບ"
+  },
+  {
+    "group": 2,
+    "section": "COLLAR",
+    "key": "pic/2/ຄໍວາຍ.png",
+    "kind": "PRODUCT",
+    "file": "image-2-4.png",
+    "position": 4,
+    "name": "ຄໍວາຍ"
+  },
+  {
+    "group": 2,
+    "section": "COLLAR",
+    "key": "pic/2/ຄໍວີຊ້ອນ.png",
+    "kind": "PRODUCT",
+    "file": "image-2-5.png",
+    "position": 5,
+    "name": "ຄໍວີຊ້ອນ"
+  },
+  {
+    "group": 3,
+    "section": "COLLAR",
+    "key": "pic/3/ຄໍຄາງໝູປົກ.png",
+    "kind": "PRODUCT",
+    "file": "image-3-1.png",
+    "position": 1,
+    "name": "ຄໍຄາງໝູປົກ"
+  },
+  {
+    "group": 3,
+    "section": "COLLAR",
+    "key": "pic/3/ຄໍຈີນ.png",
+    "kind": "PRODUCT",
+    "file": "image-3-2.png",
+    "position": 2,
+    "name": "ຄໍຈີນ"
+  },
+  {
+    "group": 3,
+    "section": "COLLAR",
+    "key": "pic/3/ຄໍໂປໂລ.png",
+    "kind": "PRODUCT",
+    "file": "image-3-3.png",
+    "position": 3,
+    "name": "ຄໍໂປໂລ"
+  },
+  {
+    "group": 3,
+    "section": "COLLAR",
+    "key": "pic/3/ຄໍວີປົກ.png",
+    "kind": "PRODUCT",
+    "file": "image-3-4.png",
+    "position": 4,
+    "name": "ຄໍວີປົກ"
+  },
+  {
+    "group": 4,
+    "section": "PART",
+    "key": "pic/orther part/ແຂນສັ້ນ.png",
+    "kind": "COMPONENT",
+    "file": "image-4-1.png",
+    "position": 1,
+    "name": "ແຂນສັ້ນ"
+  },
+  {
+    "group": 4,
+    "section": "PART",
+    "key": "pic/orther part/ແຂນຍາວ.png",
+    "kind": "COMPONENT",
+    "file": "image-4-2.png",
+    "position": 2,
+    "name": "ແຂນຍາວ"
+  },
+  {
+    "group": 4,
+    "section": "PART",
+    "key": "pic/orther part/ບ່າສະໂຫຼບ.png",
+    "kind": "COMPONENT",
+    "file": "image-4-3.png",
+    "position": 3,
+    "name": "ບ່າສະໂຫຼບ"
+  },
+  {
+    "group": 4,
+    "section": "PART",
+    "key": "pic/orther part/ບ່າທຳມະດາ.png",
+    "kind": "COMPONENT",
+    "file": "image-4-4.png",
+    "position": 4,
+    "name": "ບ່າທຳມະດາ"
+  },
+  {
+    "group": 4,
+    "section": "PART",
+    "key": "pic/orther part/ປາຍແຂນຕໍ່.png",
+    "kind": "COMPONENT",
+    "file": "image-4-5.png",
+    "position": 5,
+    "name": "ປາຍແຂນຕໍ່"
+  },
+  {
+    "group": 4,
+    "section": "PART",
+    "key": "pic/orther part/ປາຍແຂນປ່ອຍ.png",
+    "kind": "COMPONENT",
+    "file": "image-4-6.png",
+    "position": 6,
+    "name": "ປາຍແຂນປ່ອຍ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/1",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 1,
+    "name": "ແຈັກກາດ 01"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/2",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 2,
+    "name": "ແຈັກກາດ 02"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/3",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 3,
+    "name": "ແຈັກກາດ 03"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/4",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 4,
+    "name": "ໄມໂຄຣໜ້າລຽບ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/5",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 5,
+    "name": "ຈຸຕິ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/6",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 6,
+    "name": "ສາຍຝົນ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/7",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 7,
+    "name": "ດາວກະຈາຍ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/8",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 8,
+    "name": "ຕາໜ່າງນ້ອຍ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/9",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 9,
+    "name": "ຕາລາງໝາກຮຸກ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/10",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 10,
+    "name": "ຕາລາງເລັກເງົາ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/11",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 11,
+    "name": "ພູມ່າ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/12",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 12,
+    "name": "ລິ້ວຕັ້ງ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/13",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 13,
+    "name": "ລິ້ວເງົາ 3 ເສັ້ນ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/14",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 14,
+    "name": "ລິ້ວເງົາ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/15",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 15,
+    "name": "ລູກກ໊ອບ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/16",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 16,
+    "name": "ອະຕອມ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/17",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 17,
+    "name": "ອິດເງົາ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/18",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 18,
+    "name": "ຮັງເຜິ້ງ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/19",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 19,
+    "name": "ເມັດສາລີ"
+  },
+  {
+    "group": 5,
+    "section": "FABRIC",
+    "key": "fabric/20",
+    "kind": "FABRIC",
+    "file": null,
+    "position": 20,
+    "name": "ເມັດເຂົ້າສານ"
+  }
+]

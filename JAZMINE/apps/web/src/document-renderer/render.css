@@ -1,0 +1,93 @@
+@page {
+  size: A4 portrait;
+  margin: 16mm;
+}
+html,
+body {
+  margin: 0;
+  background: #fff;
+  color: #111;
+}
+body {
+  font-family: 'Noto Sans Lao', 'Noto Sans Thai', sans-serif;
+  font-size: 10pt;
+  line-height: 1.45;
+}
+* {
+  box-sizing: border-box;
+}
+button {
+  display: none !important;
+}
+.archived-document {
+  overflow-wrap: anywhere;
+}
+.archived-document h1 {
+  font-size: 18pt;
+  margin: 5mm 0;
+}
+.archived-document h2 {
+  font-size: 16pt;
+}
+.archived-document p {
+  margin: 3mm 0;
+}
+.archived-document table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+.archived-document th,
+.archived-document td {
+  text-align: left;
+  padding: 2mm 1mm;
+  border-bottom: 0.3mm solid #bbb;
+  vertical-align: top;
+}
+.archived-document th:first-child {
+  width: 44%;
+}
+.archived-document thead {
+  display: table-header-group;
+}
+.archived-document tr,
+.quotation-totals,
+.archive-qr {
+  break-inside: avoid;
+}
+.quotation-total {
+  font-size: 13pt;
+  font-weight: 700;
+}
+.quotation-notes,
+.work-notes {
+  white-space: pre-wrap;
+}
+.archive-qr {
+  display: flex;
+  align-items: center;
+  gap: 4mm;
+  margin-top: 5mm;
+}
+.archive-qr img {
+  width: 35mm;
+  height: 35mm;
+}
+.ps-page {
+  font-size: 10pt;
+}
+.ps-page * {
+  font-size: 10pt !important;
+}
+.ps-page .ps-wordmark {
+  font-size: 23pt !important;
+}
+.ps-print-root {
+  padding: 0;
+  background: white;
+}
+@media print {
+  .ps-page {
+    font-size: 10pt;
+  }
+}

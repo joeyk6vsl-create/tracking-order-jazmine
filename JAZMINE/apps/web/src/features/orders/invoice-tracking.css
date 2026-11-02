@@ -1,0 +1,111 @@
+.invoice-qr-controls {
+  border-top: 1px solid #dfe5ed;
+  margin-top: 18px;
+  padding-top: 16px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.invoice-qr-controls .invoice-qr-toggle {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 14px 0;
+}
+.invoice-qr-toggle input {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+}
+.invoice-qr-controls button {
+  max-width: 100%;
+  white-space: normal;
+}
+.invoice-tracking-qr {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 18px 0;
+  padding: 14px;
+  border: 1px solid #dfe5ed;
+  border-radius: 12px;
+  color: #102d4d;
+  background: #fff;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.invoice-tracking-qr img {
+  display: block;
+  width: 140px;
+  height: 140px;
+  flex: none;
+}
+.invoice-tracking-qr p {
+  margin: 7px 0;
+}
+@media (max-width: 600px) {
+  .invoice-tracking-qr {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+@media print {
+  html:has(.invoice-print),
+  body:has(.invoice-print) {
+    background: white !important;
+  }
+  body:has(.invoice-print) .sidebar,
+  body:has(.invoice-print) .topbar,
+  body:has(.invoice-print) .workspace-footer,
+  body:has(.invoice-print) .page-content > :not(.invoice-print):not(:has(.invoice-print)),
+  body:has(.invoice-print)
+    .page-content
+    :has(.invoice-print)
+    > :not(.invoice-print):not(:has(.invoice-print)) {
+    display: none !important;
+  }
+  body:has(.invoice-print) .app-shell,
+  body:has(.invoice-print) .workspace,
+  body:has(.invoice-print) .page-content,
+  body:has(.invoice-print) .page-content :has(.invoice-print) {
+    display: block !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  .invoice-tracking-qr {
+    flex-direction: row;
+    gap: 4mm;
+    padding: 3mm;
+    margin: 4mm 0;
+    border: 0.3mm solid #888;
+    border-radius: 0;
+    color: #000;
+    font-size: 9pt;
+  }
+  .invoice-tracking-qr img {
+    width: 35mm;
+    height: 35mm;
+  }
+  .invoice-tracking-qr a {
+    color: #000;
+  }
+  .invoice-print {
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: white !important;
+    color: black;
+  }
+  .invoice-print details {
+    display: none;
+  }
+  .invoice-print table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

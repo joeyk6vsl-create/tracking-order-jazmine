@@ -1,0 +1,34 @@
+name: ตรวจระบบ JAZMINE
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: JAZMINE
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: JAZMINE/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: เตรียมเครื่องมือตรวจเอกสาร PDF
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - run: pnpm test:e2e

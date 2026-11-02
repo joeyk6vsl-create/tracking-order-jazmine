@@ -1,0 +1,18 @@
+.search-results {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  margin: 20px 0;
+}
+.search-results li {
+  border-bottom: 1px solid #dfe5ed;
+  padding: 16px 0;
+  overflow-wrap: anywhere;
+}
+.search-results a {
+  display: block;
+}
+.search-results .badge {
+  font-size: 12px;
+}

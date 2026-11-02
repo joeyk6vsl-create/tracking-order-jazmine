@@ -1,0 +1,145 @@
+.settlement-page {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.settlement-page label {
+  display: grid;
+  gap: 8px;
+}
+.settlement-search {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.settlement-search label {
+  flex: 1;
+}
+.settlement-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.settlement-totals > div {
+  display: grid;
+  gap: 8px;
+  background: var(--surface-muted, #f3f5f9);
+  padding: 18px;
+  border-radius: 12px;
+}
+.settlement-totals strong {
+  font-size: clamp(18px, 2vw, 26px);
+  overflow-wrap: anywhere;
+}
+.settlement-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.settlement-wide {
+  grid-column: 1/-1;
+}
+.settlement-record {
+  padding: 20px 0;
+  border-top: 1px solid #dce2eb;
+  overflow-wrap: anywhere;
+}
+.settlement-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.settlement-check {
+  display: flex !important;
+  align-items: start;
+}
+.settlement-check input {
+  width: auto;
+  min-height: 0;
+  margin-top: 6px;
+}
+.settlement-table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.settlement-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.settlement-table th,
+.settlement-table td {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #dce2eb;
+}
+.settlement-page fieldset {
+  min-width: 0;
+}
+.settlement-page textarea {
+  min-height: 80px;
+}
+.settlement-page input,
+.settlement-page select,
+.settlement-page textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+.receipt-print {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .settlement-totals,
+  .settlement-fields {
+    grid-template-columns: 1fr;
+  }
+  .settlement-search {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .settlement-page .pricing-panel {
+    padding: 18px;
+  }
+  .settlement-table table {
+    min-width: 520px;
+  }
+}
+@media print {
+  html:has(.receipt-print),
+  body:has(.receipt-print),
+  body:has(.receipt-print) .app-shell,
+  body:has(.receipt-print) .workspace,
+  body:has(.receipt-print) .page-content {
+    background: white !important;
+  }
+  body:has(.receipt-print) .sidebar,
+  body:has(.receipt-print) .topbar,
+  body:has(.receipt-print) .workspace-footer,
+  .settlement-page > :not(.receipt-print) {
+    display: none !important;
+  }
+  body:has(.receipt-print) .app-shell,
+  body:has(.receipt-print) .workspace,
+  body:has(.receipt-print) .page-content,
+  .settlement-page {
+    display: block !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .receipt-print {
+    border-radius: 0 !important;
+    position: static !important;
+    visibility: visible !important;
+    width: 100% !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 12mm !important;
+  }
+  .receipt-print * {
+    visibility: visible !important;
+  }
+  .receipt-print button {
+    display: none !important;
+  }
+}

@@ -1,0 +1,105 @@
+.payment-qr-settings,
+.payment-qr-controls {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.payment-qr-settings fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.payment-qr-controls {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #dce5ed;
+  border-radius: 12px;
+}
+.payment-qr-controls label.payment-qr-toggle,
+.payment-qr-settings label.payment-qr-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 12px 0;
+}
+.payment-qr-toggle input {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+}
+.payment-qr-controls button,
+.payment-qr-settings button {
+  max-width: 100%;
+  white-space: normal;
+}
+.payment-qr-preview {
+  max-width: 250px;
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.payment-qr-settings input[type='file'] {
+  max-width: 100%;
+}
+.invoice-payment-qrs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0;
+  break-inside: avoid;
+}
+.invoice-payment-qr {
+  flex: 1;
+  min-width: 220px;
+  border: 1px solid #dce5ed;
+  padding: 14px;
+  background: white;
+  color: #152d46;
+  overflow-wrap: anywhere;
+  break-inside: avoid;
+}
+.invoice-payment-qr img {
+  display: block;
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  margin: 10px 0;
+}
+.invoice-payment-qr p {
+  margin: 6px 0;
+}
+@media (max-width: 600px) {
+  .invoice-payment-qrs {
+    flex-direction: column;
+  }
+  .invoice-payment-qr {
+    min-width: 0;
+    width: 100%;
+  }
+}
+@media print {
+  .payment-qr-controls {
+    display: none !important;
+  }
+  .invoice-payment-qrs {
+    display: flex !important;
+    flex-direction: row;
+    gap: 4mm;
+    margin: 4mm 0;
+    break-inside: avoid;
+  }
+  .invoice-payment-qr {
+    min-width: 0;
+    padding: 3mm;
+    font-size: 10pt;
+    line-height: 1.3;
+  }
+  .invoice-payment-qr img {
+    width: 35mm;
+    height: 35mm;
+    margin: 2mm 0;
+  }
+  .invoice-payment-qr p {
+    margin: 1.5mm 0;
+  }
+}

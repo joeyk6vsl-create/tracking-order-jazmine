@@ -1,0 +1,120 @@
+.work-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  margin: 24px 0;
+}
+.issue-quantities {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+@media (max-width: 700px) {
+  .issue-quantities {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.work-queue {
+  display: grid;
+  gap: 14px;
+  margin: 20px 0;
+}
+.work-job {
+  padding: 22px;
+  display: grid;
+  gap: 14px;
+}
+.work-job h2 {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+.work-job button {
+  justify-self: start;
+}
+.work-badges,
+.work-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.work-state {
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #edf1f6;
+  overflow-wrap: anywhere;
+}
+.work-state.IN_PROGRESS {
+  background: #e4f0ff;
+  color: #0653a6;
+}
+.work-state.COMPLETED {
+  background: #dcf5e8;
+  color: #12643a;
+}
+.work-stage-grid,
+.work-file-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.work-stage-card {
+  border: 1px solid #dfe5ed;
+  border-radius: 14px;
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+}
+.work-stage-card h3 {
+  font-size: 17px;
+}
+.work-stage-card .muted {
+  font-size: 13px;
+}
+.work-file-grid article {
+  border: 1px solid #dfe5ed;
+  border-radius: 12px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.work-file-grid img {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+}
+.work-notes {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.work-detail {
+  margin-top: 30px;
+}
+.work-detail select {
+  max-width: 320px;
+}
+@media (max-width: 700px) {
+  .work-filters,
+  .work-stage-grid,
+  .work-file-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .work-job {
+    padding: 16px;
+  }
+  .work-stage-card {
+    padding: 14px;
+  }
+  .work-actions button {
+    flex: 1;
+  }
+  .work-detail h2 {
+    overflow-wrap: anywhere;
+  }
+}

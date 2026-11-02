@@ -1,0 +1,88 @@
+.reports-page {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.report-filters {
+  display: flex;
+  gap: 16px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.report-filters label {
+  flex: 1;
+  min-width: 180px;
+}
+.report-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.report-cards > div {
+  display: grid;
+  gap: 12px;
+}
+.report-cards strong {
+  font-size: 24px;
+  overflow-wrap: anywhere;
+}
+.report-table {
+  max-width: 100%;
+  overflow: auto;
+}
+.report-table table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+}
+.report-table th,
+.report-table td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #dfe5ed;
+}
+.report-trend {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+.report-day {
+  display: grid;
+  gap: 5px;
+}
+.report-bar {
+  background: #0066cc;
+  height: 12px;
+  border-radius: 8px;
+  min-width: 0;
+}
+.report-day span:last-child {
+  font-size: 13px;
+}
+.reports-page .warning {
+  display: block;
+}
+@media (max-width: 900px) {
+  .report-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 580px) {
+  .report-cards {
+    grid-template-columns: 1fr;
+  }
+  .reports-page .pricing-panel {
+    padding: 18px;
+  }
+  .report-filters {
+    align-items: stretch;
+  }
+  .report-filters label {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+  .report-filters button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,4 @@
+packages: []
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@node-rs/argon2'

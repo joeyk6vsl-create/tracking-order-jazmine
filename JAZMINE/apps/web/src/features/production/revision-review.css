@@ -1,0 +1,49 @@
+.revision-review {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.revision-review fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.revision-source {
+  border: 1px solid #dfe5ed;
+  border-radius: 12px;
+  padding: 18px;
+  margin: 18px 0;
+}
+.revision-line {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border-top: 1px solid #dfe5ed;
+  padding: 14px 0;
+}
+.revision-line > p {
+  grid-column: 1/-1;
+}
+.revision-review .revision-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 16px 0;
+}
+.revision-review .revision-check input {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  margin-top: 3px;
+}
+@media (max-width: 600px) {
+  .revision-source {
+    padding: 12px;
+  }
+  .revision-line {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .revision-review button {
+    max-width: 100%;
+    white-space: normal;
+  }
+}

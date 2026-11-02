@@ -1,0 +1,46 @@
+.order-lifecycle {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.lifecycle-clear {
+  background: #eefaf4;
+  border: 1px solid #a3d9be;
+  border-radius: 12px;
+  padding: 14px;
+}
+.order-lifecycle fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.lifecycle-effects {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.lifecycle-effects p,
+.lifecycle-history article {
+  border: 1px solid #dfe5ed;
+  border-radius: 12px;
+  padding: 12px;
+}
+.order-lifecycle .lifecycle-review {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 18px 0;
+}
+.order-lifecycle .lifecycle-review input {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+}
+.order-lifecycle button {
+  max-width: 100%;
+  white-space: normal;
+}
+@media (max-width: 700px) {
+  .lifecycle-effects {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

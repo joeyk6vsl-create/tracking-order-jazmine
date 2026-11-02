@@ -1,0 +1,31 @@
+# โค้ดที่ติดตั้งและผลที่สร้างใหม่ได้
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# ค่าลับของแต่ละเครื่อง เก็บได้เฉพาะไฟล์ตัวอย่าง
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+
+# ข้อมูลร้าน รูปที่อัปโหลด และสำเนาสำรองในเครื่อง
+local-data/
+local-uploads/
+local-backups/
+*.jazbackup
+
+# ผลทดลอง เอกสารที่สร้างจากข้อมูล และไฟล์ชั่วคราว
+test-results/
+playwright-report/
+output/
+tmp/
+*.log
+
+# ไฟล์ที่ระบบปฏิบัติการสร้าง
+.DS_Store
+Thumbs.db

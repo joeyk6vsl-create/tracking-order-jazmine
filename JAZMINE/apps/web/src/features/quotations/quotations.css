@@ -1,0 +1,177 @@
+.quotation-panel,
+.quotations-page,
+.quotation-print {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.quotation-panel fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.quotation-panel textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  font: inherit;
+}
+.quotation-panel button,
+.quotations-page button {
+  max-width: 100%;
+  white-space: normal;
+}
+.quotation-history li {
+  margin-bottom: 12px;
+}
+.quotation-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.quotation-print table,
+.quotation-panel table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.quotation-print th,
+.quotation-print td,
+.quotation-panel th,
+.quotation-panel td {
+  padding: 8px;
+  border-bottom: 1px solid #dfe5ed;
+  text-align: left;
+  vertical-align: top;
+}
+.quotation-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+.quotation-total {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.quotation-notes {
+  white-space: pre-wrap;
+}
+.quotation-qr {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.quotation-qr img {
+  width: 140px;
+  height: 140px;
+  flex: none;
+}
+.quotation-qr p {
+  margin: 5px 0;
+}
+.quotation-disclaimer {
+  font-size: 0.85rem;
+  color: #526078;
+}
+@media (max-width: 600px) {
+  .quotation-heading,
+  .quotation-qr {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .quotation-print {
+    padding: 14px;
+  }
+  .quotation-table-scroll table {
+    min-width: 480px;
+  }
+}
+@media print {
+  html:has(.quotation-print),
+  body:has(.quotation-print) {
+    background: white !important;
+  }
+  body:has(.quotation-print) .sidebar,
+  body:has(.quotation-print) .topbar,
+  body:has(.quotation-print) .workspace-footer,
+  body:has(.quotation-print) .page-content > :not(.quotation-print):not(:has(.quotation-print)),
+  body:has(.quotation-print)
+    .page-content
+    :has(.quotation-print)
+    > :not(.quotation-print):not(:has(.quotation-print)) {
+    display: none !important;
+  }
+  body:has(.quotation-print) .app-shell,
+  body:has(.quotation-print) .workspace,
+  body:has(.quotation-print) .page-content,
+  body:has(.quotation-print) .page-content :has(.quotation-print) {
+    display: block !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  .quotation-print,
+  .quotation-print * {
+    visibility: visible !important;
+  }
+  .quotation-print {
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #000;
+    background: white !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 9pt;
+  }
+  .quotation-print h2 {
+    font-size: 16pt;
+    margin: 6px 0;
+  }
+  .quotation-print p {
+    margin: 6px 0;
+  }
+  .quotation-heading {
+    flex-direction: row;
+    break-inside: avoid;
+  }
+  .quotation-table-scroll {
+    overflow: visible;
+  }
+  .quotation-table-scroll table {
+    min-width: 0;
+    table-layout: fixed;
+  }
+  .quotation-print th:first-child {
+    width: 44%;
+  }
+  .quotation-print th,
+  .quotation-print td {
+    padding: 2mm 1mm;
+  }
+  .quotation-print tr,
+  .quotation-totals {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .quotation-print thead {
+    display: table-header-group;
+  }
+  .quotation-qr {
+    flex-direction: row;
+    gap: 4mm;
+    margin: 4mm 0;
+  }
+  .quotation-qr img {
+    width: 35mm;
+    height: 35mm;
+  }
+  .quotation-print .quotation-disclaimer {
+    color: #000;
+  }
+}

@@ -1,0 +1,27 @@
+# ไฟล์ติดตั้งและไฟล์ที่เกิดจากการสร้างโปรแกรม
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# ค่าลับของแต่ละเครื่อง เก็บได้เฉพาะตัวอย่างที่ไม่มีค่าลับ
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# ผลการทดสอบและบันทึกจากโปรแกรม
+playwright-report/
+test-results/
+*.log
+
+# ไฟล์ข้อมูลในเครื่องที่ไม่ควรเก็บในประวัติโค้ด
+local-data/
+local-uploads/
+local-backups/
+*.jazbackup
+
+# ไฟล์ที่ระบบปฏิบัติการสร้างเอง
+.DS_Store
+Thumbs.db

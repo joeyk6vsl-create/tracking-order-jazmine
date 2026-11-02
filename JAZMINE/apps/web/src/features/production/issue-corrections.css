@@ -1,0 +1,52 @@
+.issue-correction,
+.issue-correction-history {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  margin-top: 18px;
+}
+.issue-correction fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.correction-line {
+  border: 1px solid #dfe5ed;
+  border-radius: 12px;
+  margin: 14px 0;
+  padding: 16px;
+  min-width: 0;
+}
+.correction-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.issue-correction .correction-check {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 18px 0;
+}
+.issue-correction .correction-check input {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  margin-top: 3px;
+}
+.issue-correction button {
+  max-width: 100%;
+  white-space: normal;
+}
+@media (max-width: 800px) {
+  .correction-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 440px) {
+  .correction-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .correction-line {
+    padding: 12px;
+  }
+}
