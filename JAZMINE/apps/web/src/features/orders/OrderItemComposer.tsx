@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CatalogItem } from '../../../../../packages/contracts/src/catalog';
 import type { CatalogChoices } from '../../../../../packages/contracts/src/catalog-choices';
 import {
@@ -46,6 +46,10 @@ export function OrderItemComposer({
   const [busy, setBusy] = useState(false),
     [loading, setLoading] = useState(false),
     [error, setError] = useState('');
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [error]);
   useEffect(() => {
     let alive = true;
     if (!product) return;
@@ -109,7 +113,6 @@ export function OrderItemComposer({
       setError('ໃສ່ຈຳນວນເຕັມ 0–10,000 / Quantities must be whole numbers from 0 to 10,000.');
       return;
     }
-    setBusy(true);
     try {
       const lines = selectedSizes.map((size) =>
         quoteSchema.parse({
@@ -122,13 +125,17 @@ export function OrderItemComposer({
           ...counts[size],
         }),
       );
+      if (add) {
+        onAdd(lines);
+        return;
+      }
+      setBusy(true);
       // Prices and option validation always come from the central service.
       const results = await Promise.all(
         lines.map((line) => api<QuoteResult>('/pricing/quote', 'POST', line)),
       );
       setPrices(Object.fromEntries(results.map((result, index) => [lines[index].size, result])));
       setPriceContext(`${group}:${currency}`);
-      if (add) onAdd(lines);
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -162,6 +169,7 @@ export function OrderItemComposer({
           onFabric={(value) => {
             setFabric(value);
             setPrices({});
+            setError('');
           }}
         />
         {choices &&
@@ -188,8 +196,18 @@ export function OrderItemComposer({
           onChange={(value) => {
             setParts(value);
             setPrices({});
+            setError('');
           }}
         />
+        <p role="status">
+          ເລືອກ Size ໂດຍໃສ່ຈຳນວນໃນແຖວນັ້ນ / To select a size, enter its quantity in the table.
+          {selectedSizes.length > 0 && ` ${selectedSizes.length} Size selected.`}
+        </p>
+        {error && (
+          <p ref={errorRef} className="alert error" role="alert" tabIndex={-1}>
+            {error}
+          </p>
+        )}
         {sizes.length > 0 && (
           <SizeQuantityTable
             sizes={sizes}
@@ -198,6 +216,7 @@ export function OrderItemComposer({
             onChange={(size, value) => {
               setCounts((current) => ({ ...current, [size]: value }));
               setPrices({});
+              setError('');
             }}
           />
         )}
@@ -218,11 +237,6 @@ export function OrderItemComposer({
         </button>
       </fieldset>
       {loading && <p role="status">Loading options…</p>}
-      {error && (
-        <p className="alert error" role="alert">
-          {error}
-        </p>
-      )}
       {[...new Set(Object.values(currentPrices).flatMap((price) => price?.missing ?? []))].map(
         (message) => (
           <p key={message} role="status">

@@ -190,6 +190,13 @@ try {
     .locator('.product-options')
     .getByRole('button', { name: fabric.name, exact: true })
     .click();
+  await page.getByRole('button', { name: /Add selected sizes/ }).click();
+  await page
+    .getByRole('alert')
+    .getByText(/Enter at least one size quantity/)
+    .waitFor();
+  await page.getByText(/To select a size, enter its quantity in the table/).waitFor();
+  assert.equal(await page.locator('.draft-line').count(), 0);
   for (const [label, prefix] of [
     ['แขนเสื้อ', 'ແຂນ'],
     ['ปลายแขน', 'ປາຍແຂນ'],
@@ -212,6 +219,7 @@ try {
   assert.equal(await page.getByLabel('Quantity M', { exact: true }).inputValue(), '1');
   await page.getByLabel('Quantity M', { exact: true }).fill('2');
   await page.getByLabel('Quantity L', { exact: true }).fill('3');
+  assert.equal(await page.locator('.size-row-selected').count(), 2);
   await page.getByLabel('Quantity M', { exact: true }).fill('1.5');
   await page.getByRole('button', { name: /Add selected sizes/ }).click();
   await page
@@ -234,7 +242,19 @@ try {
     .locator('.size-quantity-panel')
     .screenshot({ path: 'test-results/order-size-table-mobile.png' });
   await page.setViewportSize({ width: 1440, height: 1000 });
+  let quoteRequestsDuringAdd = 0;
+  await page.route('**/api/v1/pricing/quote', async (route) => {
+    quoteRequestsDuringAdd++;
+    await route.abort('failed');
+  });
   await page.getByRole('button', { name: /Add selected sizes/ }).click();
+  assert.equal(await page.locator('.draft-line').count(), 3);
+  assert.equal(
+    quoteRequestsDuringAdd,
+    0,
+    'Adding selected sizes should not depend on a price request',
+  );
+  await page.unroute('**/api/v1/pricing/quote');
   await page.getByLabel('ชื่อลูกค้าของร่าง', { exact: true }).fill('TEST CUSTOMER ONLY');
   await page.getByLabel('เบอร์ลูกค้าของร่าง', { exact: true }).fill('02055551234');
   await page.getByLabel('แบรนด์ของร่าง', { exact: true }).selectOption('JAZMINE_STANDARD');

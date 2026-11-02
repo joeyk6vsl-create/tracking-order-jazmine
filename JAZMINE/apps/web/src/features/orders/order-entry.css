@@ -12,6 +12,9 @@
   padding: 8px 4px;
   border-bottom: 1px solid var(--border, #dce2eb);
 }
+.size-quantity-table .size-row-selected {
+  background: #eef8f2;
+}
 .size-quantity-table th:first-child {
   width: 18%;
 }

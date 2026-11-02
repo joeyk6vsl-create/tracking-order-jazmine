@@ -29,8 +29,14 @@ export function SizeQuantityTable({
             const count = counts[size] ?? { quantity: 0, freeQuantity: 0 };
             const price = prices[size];
             return (
-              <tr key={size}>
-                <th scope="row">{size}</th>
+              <tr
+                key={size}
+                className={count.quantity + count.freeQuantity > 0 ? 'size-row-selected' : ''}
+              >
+                <th scope="row">
+                  {size}
+                  {count.quantity + count.freeQuantity > 0 ? ' ✓' : ''}
+                </th>
                 <td>{price?.unit == null ? '—' : price.unit.toLocaleString()}</td>
                 <td>
                   <div className="quantity-stepper">

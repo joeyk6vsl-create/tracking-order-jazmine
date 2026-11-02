@@ -1,5 +1,7 @@
 # คู่มือโฟลเดอร์และไฟล์ JAZMINE
 
+ปุ่มเพิ่มไซซ์และคำเตือนอยู่ใน `apps/web/src/features/orders/OrderItemComposer.tsx` การกรอกจำนวนและเครื่องหมายแถวที่เลือกอยู่ใน `SizeQuantityTable.tsx` สีแถวอยู่ใน `order-entry.css` งานคำนวณราคาและบันทึกใช้บริการเดิม ดู [คู่มือรับออเดอร์](docs/ORDER_ENTRY_MULTI_SIZE_TH.md)
+
 การรองรับ Lao QR ส่วนตัวอยู่ใน `apps/server/src/payment-qr/lao-personal-qr.ts` อ่านช่องข้อมูลผ่าน `payment-qr-fields.ts` ส่วนการตรวจภาพและเงื่อนไขเงินยังอยู่ใน `validate-payment-image.ts` ไม่มีรูปหรือบัญชีจริงในไฟล์ทดสอบ รายละเอียดใน [คู่มือ QR](docs/PAYMENT_QR_TH.md)
 
 หน้ารับออเดอร์หลายไซซ์และแนบภาพแยกเป็น `OrderItemComposer`, `SizeQuantityTable`, `DraftLines`, `CustomerArtworkPicker` และ `useSaveDraftWithArtwork` เพื่อให้แต่ละส่วนมีหน้าที่เดียว รายละเอียดภาษาไทยพร้อมตารางชื่อไฟล์อยู่ใน [คู่มือรับออเดอร์หลายไซซ์](docs/ORDER_ENTRY_MULTI_SIZE_TH.md)
