@@ -15,6 +15,9 @@ import { useSession } from '../auth/SessionProvider';
 import { PricingExtras } from './PricingExtras';
 import { QuoteParts } from './QuoteParts';
 import { ProductPicker } from './ProductPicker';
+import { ProductOptions } from './ProductOptions';
+import { ProductPriceGroups } from './ProductPriceGroups';
+import { CatalogChoicesForm } from '../catalog/CatalogChoicesForm';
 
 export function PricingPage({
   onSaveDraft,
@@ -274,6 +277,15 @@ export function PricingPage({
                 ))}
             </div>
           </details>
+          <ProductPriceGroups
+            items={items}
+            config={view.config}
+            disabled={!owner || busy}
+            onChange={(config) => {
+              setView({ ...view, config });
+              setResult(null);
+            }}
+          />
           <PricingExtras
             items={items}
             config={view.config}
@@ -312,6 +324,30 @@ export function PricingPage({
           คำนวณด้วยราคาฉบับที่บันทึกแล้ว รวมเฉพาะส่วนประกอบที่เลือก
           ยังไม่สร้างออเดอร์หรือบันทึกรับเงินจริง
         </p>
+        {choices && (!choices.sizes.length || !choices.fabricIds.length) && (
+          <section className="notice product-setup-notice">
+            <p>
+              ແບບນີ້ຍັງບໍ່ມີຜ້າ ຫຼື Size / Fabrics and sizes have not been set for this product.
+            </p>
+            {owner ? (
+              <details open>
+                <summary>ຕັ້ງຄ່າແບບນີ້ / Set up this product</summary>
+                <CatalogChoicesForm
+                  key={product + ':' + choices.rowVersion}
+                  item={items.find((i) => i.id === product)!}
+                  canEdit
+                  onSaved={() => {
+                    void choose(product);
+                  }}
+                />
+              </details>
+            ) : (
+              <p>
+                ໃຫ້ເຈົ້າຂອງຕັ້ງຄ່າທີ່ Catalog / Ask the owner to set fabrics and sizes in Catalog.
+              </p>
+            )}
+          </section>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -340,6 +376,19 @@ export function PricingPage({
                   : '(เจ้าของยังไม่กำหนด)'}
               </label>
             )}
+            <ProductOptions
+              choices={choices}
+              size={size}
+              fabric={fabric}
+              onSize={(next) => {
+                setSize(next);
+                setResult(null);
+              }}
+              onFabric={(next) => {
+                setFabric(next);
+                setResult(null);
+              }}
+            />
             <QuoteParts
               items={items}
               disabled={busy}
@@ -371,7 +420,7 @@ export function PricingPage({
                 >
                   <option value="">เลือกแบบเสื้อ</option>
                   {items
-                    .filter((i) => i.section === 'COLLAR' && i.active)
+                    .filter((i) => i.kind === 'PRODUCT' && i.active)
                     .map((i) => (
                       <option key={i.id} value={i.id}>
                         {i.name}

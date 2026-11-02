@@ -1,5 +1,7 @@
 # คู่มือโฟลเดอร์และไฟล์ JAZMINE
 
+การแก้เพิ่มรูปสินค้า รายการไม่มีภาพ ปุ่มผ้าและไซซ์ สินค้าเพิ่มเอง และปุ่มบันทึก QR พร้อมแผนผลกระทบและคำอธิบายหน้าที่ไฟล์ ดู [docs/CATALOG_ORDER_QR_FIX_TH.md](docs/CATALOG_ORDER_QR_FIX_TH.md)
+
 สำเนาเอกสารพร้อมสถานะปัจจุบัน การตรวจใหม่ก่อนพิมพ์ และตั้งค่าเก็บออเดอร์เก่าอัตโนมัติ พร้อมหน้าที่ไฟล์ภาษาไทย ดู [docs/DOCUMENT_STATUS_AND_AUTO_ARCHIVE_TH.md](docs/DOCUMENT_STATUS_AND_AUTO_ARCHIVE_TH.md)
 
 ยกเลิกแผนใช้ต่องานผลิตทั้งชุด คืนใบเก่า ปิดใบใหม่ รักษาประวัติและคำอธิบายไฟล์ภาษาไทย ดู [docs/REVERSE_PRODUCTION_REUSE_PLAN_TH.md](docs/REVERSE_PRODUCTION_REUSE_PLAN_TH.md)

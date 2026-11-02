@@ -4,165 +4,21 @@ import { api, errorMessage } from '../../services/api';
 import { useSession } from '../auth/SessionProvider';
 import { CatalogChoicesForm } from './CatalogChoicesForm';
 import { FabricAvailability } from './FabricAvailability';
+import { CatalogEditor } from './CatalogEditor';
+import { CatalogImage } from './CatalogImage';
 
 function CatalogCard({ item, onEdit }: { item: CatalogItem; onEdit: () => void }) {
-  const [image, setImage] = useState<string | null>(null);
-  useEffect(() => {
-    let alive = true;
-    if (item.hasImage)
-      void api<{ image: string }>(`/catalog/${item.id}/image`)
-        .then((r) => {
-          if (alive) setImage(r.image);
-        })
-        .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, [item.id, item.rowVersion, item.hasImage]);
   return (
     <button
-      className={'panel catalog-card ' + (item.kind === 'FABRIC' ? 'fabric-option' : '')}
+      aria-label={item.name}
+      className={'panel catalog-card ' + (!item.hasImage ? 'fabric-option' : '')}
       onClick={onEdit}
     >
-      {image ? (
-        <img src={image} alt={item.name} loading="lazy" />
-      ) : item.kind !== 'FABRIC' ? (
-        <div className="catalog-placeholder">
-          {item.kind === 'COMPONENT' ? 'ส่วนประกอบ' : 'สินค้า'}
-        </div>
-      ) : null}
+      <CatalogImage item={item} />
       <strong>{item.name}</strong>
       {!item.active && <span>ปิดใช้งาน</span>}
       {item.notes && <p>{item.notes}</p>}
     </button>
-  );
-}
-function CatalogEditor({
-  item,
-  onDone,
-  canEdit,
-}: {
-  item: CatalogItem | null;
-  onDone: () => void;
-  canEdit: boolean;
-}) {
-  const [id] = useState(() => item?.id ?? crypto.randomUUID());
-  const [name, setName] = useState(item?.name ?? '');
-  const [kind, setKind] = useState(item?.kind ?? 'PRODUCT');
-  const [notes, setNotes] = useState(item?.notes ?? '');
-  const [active, setActive] = useState(item?.active ?? true);
-  const [busy, setBusy] = useState(false),
-    [error, setError] = useState('');
-  const [uncertain, setUncertain] = useState(false);
-  async function save() {
-    setBusy(true);
-    setError('');
-    try {
-      await api(`/catalog/${id}`, item ? 'PUT' : 'POST', {
-        name,
-        kind,
-        notes,
-        active,
-        ...(item ? { rowVersion: item.rowVersion } : {}),
-      });
-      onDone();
-    } catch (e) {
-      setError(errorMessage(e));
-      setUncertain(true);
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function upload(file?: File) {
-    if (!file) return;
-    if (file.size > 128 * 1024) {
-      setError('ภาพต้องมีขนาดไม่เกิน 128 KB');
-      return;
-    }
-    setBusy(true);
-    setError('');
-    try {
-      const image = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(new Error('อ่านภาพไม่ได้'));
-        reader.readAsDataURL(file);
-      });
-      await api(`/catalog/${id}/image`, 'PUT', { image, rowVersion: item!.rowVersion });
-      onDone();
-    } catch (e) {
-      setError(errorMessage(e));
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <section className="panel catalog-editor">
-      <h2>{item ? 'ข้อมูลรายการ' : 'เพิ่มรายการ'}</h2>
-      {error && (
-        <p role="alert" className="alert error">
-          {error} กรุณาเปิดข้อมูลล่าสุดหากมีผู้แก้ไขไปแล้ว
-        </p>
-      )}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          void save();
-        }}
-      >
-        <fieldset disabled={!canEdit || busy || uncertain}>
-          <label>
-            ประเภท
-            <select
-              value={kind}
-              disabled={!!item}
-              onChange={(e) => setKind(e.target.value as CatalogItem['kind'])}
-            >
-              <option value="PRODUCT">สินค้า</option>
-              <option value="FABRIC">ชนิดผ้า</option>
-              <option value="COMPONENT">ส่วนประกอบเสื้อ</option>
-            </select>
-          </label>
-          <label>
-            ชื่อ
-            <input
-              required
-              maxLength={120}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </label>
-          <label>
-            รายละเอียด
-            <textarea maxLength={1000} value={notes} onChange={(e) => setNotes(e.target.value)} />
-          </label>
-          <label>
-            <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />{' '}
-            เปิดใช้งาน
-          </label>
-        </fieldset>
-        {canEdit && (
-          <button className="primary" disabled={busy}>
-            {uncertain ? 'ลองบันทึกข้อมูลเดิมอีกครั้ง' : 'บันทึก'}
-          </button>
-        )}
-      </form>
-      {item && canEdit && (
-        <label>
-          เปลี่ยนรูปภาพ · PNG / JPEG / WebP ไม่เกิน 128 KB
-          <input
-            disabled={busy || uncertain}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={(e) => void upload(e.target.files?.[0])}
-          />
-        </label>
-      )}
-      <button disabled={busy} onClick={onDone}>
-        กลับรายการ / เปิดข้อมูลล่าสุด
-      </button>
-      <p className="muted">บันทึกรายการก่อนเพิ่มภาพ · ราคาจะกำหนดในขั้นถัดไป</p>
-    </section>
   );
 }
 export function CatalogPage() {
@@ -224,14 +80,18 @@ export function CatalogPage() {
       {editor !== undefined ? (
         <>
           <CatalogEditor
-            key={editor?.id ?? 'new'}
+            key={editor ? editor.id + ':' + editor.rowVersion : 'new'}
             item={editor}
             onDone={refresh}
+            onSaved={(item) => {
+              setEditor(item);
+              setReload((n) => n + 1);
+            }}
             canEdit={canEdit}
           />
           {editor && editor.kind !== 'FABRIC' && (
             <CatalogChoicesForm
-              key={'choices-' + editor.id}
+              key={'choices-' + editor.id + ':' + editor.rowVersion}
               item={editor}
               canEdit={canEdit}
               onSaved={refresh}
@@ -266,6 +126,18 @@ export function CatalogPage() {
             <>
               {kind === 'IMPORTED' && options.length > 0 ? (
                 <div className="imported-catalog">
+                  {options.some((i) => !i.sourceKey && i.kind !== 'FABRIC') && (
+                    <section className="panel catalog-section">
+                      <h2>ລາຍການທີ່ເພີ່ມ / Added items</h2>
+                      <div className="option-grid">
+                        {options
+                          .filter((i) => !i.sourceKey && i.kind !== 'FABRIC')
+                          .map((i) => (
+                            <CatalogCard key={i.id} item={i} onEdit={() => setEditor(i)} />
+                          ))}
+                      </div>
+                    </section>
+                  )}
                   <section className="panel catalog-section">
                     <h2>ຄໍເສື້ອ · แบบคอเสื้อ</h2>
                     {[1, 2, 3].map((group) => (

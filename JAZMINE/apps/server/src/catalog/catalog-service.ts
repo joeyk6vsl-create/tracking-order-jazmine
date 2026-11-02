@@ -4,6 +4,7 @@ import { Database } from '../database';
 import { ActorAuthorization } from '../identity/application/actor-authorization';
 import { AppError } from '../errors';
 import { recordAudit } from '../shared/audit';
+import { validateCatalogImage } from './catalog-image';
 
 const projection =
   'id,kind,name,notes,active,section,availability,source_key AS "sourceKey",display_group AS "displayGroup",display_order AS "displayOrder",row_version AS "rowVersion",(image_data IS NOT NULL) AS "hasImage"';
@@ -45,11 +46,13 @@ export class CatalogService {
     await this.auth.require(this.db, actor, 'customers.manage');
     return {
       items: await this.db.query(
-        `SELECT ${projection} FROM catalog_items WHERE source_key IS NOT NULL ORDER BY display_group,display_order,id`,
+        `SELECT ${projection} FROM catalog_items ORDER BY display_group,display_order,id`,
       ),
     };
   }
   async save(actor: UserView, id: string, data: CatalogInput, version?: number) {
+    await this.auth.require(this.db, actor, 'users.manage');
+    await validateCatalogImage(data.image);
     return this.db.transaction(async (sql) => {
       await this.auth.require(sql, actor, 'users.manage', true);
       const before = (
@@ -62,7 +65,8 @@ export class CatalogService {
           before.kind !== data.kind ||
           before.name !== data.name ||
           before.notes !== data.notes ||
-          before.active !== data.active
+          before.active !== data.active ||
+          (data.image !== undefined && before.image_data !== data.image)
         )
           throw new AppError('CONFLICT', 'รายการนี้ถูกบันทึกแล้ว กรุณาเปิดข้อมูลล่าสุด', 409);
         return {
@@ -81,6 +85,10 @@ export class CatalogService {
           'INSERT INTO catalog_items(id,kind,name,notes,active,created_by) VALUES($1,$2,$3,$4,$5,$6)',
           [id, data.kind, data.name, data.notes, data.active, actor.id],
         );
+      if (data.image !== undefined) {
+        await sql.query('UPDATE catalog_items SET image_data=$2 WHERE id=$1', [id, data.image]);
+        await recordAudit(sql, actor.id, 'CATALOG_IMAGE_CHANGED', id);
+      }
       await recordAudit(
         sql,
         actor.id,
@@ -103,20 +111,8 @@ export class CatalogService {
     return { image: row.image_data };
   }
   async setImage(actor: UserView, id: string, image: string | null, version: number) {
-    if (image !== null) {
-      const match = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(image);
-      const bytes = match ? Buffer.from(match[2], 'base64') : Buffer.alloc(0);
-      const valid =
-        match &&
-        ((match[1] === 'png' &&
-          bytes.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'))) ||
-          (match[1] === 'jpeg' && bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) ||
-          (match[1] === 'webp' &&
-            bytes.toString('ascii', 0, 4) === 'RIFF' &&
-            bytes.toString('ascii', 8, 12) === 'WEBP'));
-      if (!valid || bytes.length > 128 * 1024)
-        throw new AppError('INVALID_IMAGE', 'ใช้ภาพ PNG, JPEG หรือ WebP ขนาดไม่เกิน 128 KB', 400);
-    }
+    await this.auth.require(this.db, actor, 'users.manage');
+    await validateCatalogImage(image);
     return this.db.transaction(async (sql) => {
       await this.auth.require(sql, actor, 'users.manage', true);
       const row = (

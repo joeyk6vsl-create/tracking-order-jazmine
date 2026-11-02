@@ -1,5 +1,7 @@
 # ตรวจการทำงานร่วมกัน
 
+รอบแก้สินค้า/ออเดอร์/QR: catalog + pricing + order-drafts + confirmation + payment-qr ผ่าน 16 กรณี ตรวจภาพจริงก่อนบันทึก รายการเพิ่มเองต้องตามไปตัวเลือก การตั้งราคาโดยเจ้าของ การส่งซ้ำ/ข้อมูลชนกัน สิทธิ์ สูตรเดิม และความปลอดภัย QR ผลใน `test-results/catalog-order-fix-integration.log` เพิ่มกรณีใน catalog.test.ts และเปลี่ยนภาพตัวอย่างเก่าที่ข้อมูลภาพไม่สมบูรณ์เป็น PNG ที่สร้างถูกต้อง ไม่ลดความเข้มงวดการตรวจภาพ
+
 รอบสถานะเอกสาร/เก็บอัตโนมัติ: ชุด archive-automation + document-current-status + order-lifecycle + documents ผ่าน 21 กรณี; ชุด document-current-status + payment-qr + customers + backups ผ่าน 28 กรณี; หลังเพิ่มจับกรณีเขียนแล้วสะดุด ตรวจ archive-automation รุ่นสุดท้าย 6 กลุ่มผ่าน มีกรณีซ้ำกัน ห้ามบวกเป็นผลชุดรวมทั้งโครงการ ผลอยู่ใน test-results/archive-status-integration.log, archive-status-regression.log และ archive-automation-final.log ใช้ฐานจำลองแยกจากร้าน
 
 ผลรอบล่าสุด: ชุดรวมผ่าน 128 กรณี หลังเพิ่มย้อนแผน 9 กลุ่ม จากนั้นเพิ่มกรณีใบปลายทางที่ปิดผิดและตรวจส่วนย้อนแผนรุ่นสุดท้าย 10 กลุ่มผ่านทั้งหมดแยกอีกครั้ง ชุดเฉพาะใช้ `test-results/reversal-check-build` ระหว่างรอชุดรวมเพื่อไม่เขียนทับโปรแกรมที่กำลังตรวจ หลายกรณีซ้ำกับชุดรวม ห้ามบวกเป็น 138 บันทึกผล `test-results/production-reversal-integration.log` และ `production-reversal-final-focused.log`

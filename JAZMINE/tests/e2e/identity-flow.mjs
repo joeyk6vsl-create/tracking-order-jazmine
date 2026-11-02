@@ -5,6 +5,7 @@ import { mkdir } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { randomBytes } from 'node:crypto';
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 
 const require = createRequire(import.meta.url);
 const { Database } = require('../../dist/apps/server/src/database.js');
@@ -82,17 +83,19 @@ try {
   await page.screenshot({ path: 'test-results/owner-dashboard.png', fullPage: true });
   await page.locator('nav').getByRole('button', { name: 'สินค้าและชนิดผ้า', exact: true }).click();
   await page.getByRole('button', { name: 'เพิ่มรายการ', exact: true }).click();
-  await page.getByLabel('ชื่อ', { exact: true }).fill('เสื้อกีฬาทดสอบ');
-  await page.getByRole('button', { name: 'บันทึก', exact: true }).click();
-  await page.getByRole('button', { name: /เสื้อกีฬาทดสอบ/ }).click();
-  await page.locator('input[type=file]').setInputFiles({
+  await page.getByLabel('Catalog name', { exact: true }).fill('เสื้อกีฬาทดสอบ');
+  await page.getByRole('button', { name: /Save item/ }).click();
+  await page.getByRole('heading', { name: 'ไซซ์และผ้าที่ใช้ได้', exact: true }).waitFor();
+  await page.getByLabel('Catalog image', { exact: true }).setInputFiles({
     name: 'shirt.png',
     mimeType: 'image/png',
-    buffer: Buffer.from(
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=',
-      'base64',
-    ),
+    buffer: await sharp({ create: { width: 30, height: 30, channels: 3, background: '#d32f2f' } })
+      .png()
+      .toBuffer(),
   });
+  await page.getByAltText('Selected item preview', { exact: true }).waitFor();
+  await page.getByRole('button', { name: /Save item/ }).click();
+  await page.getByRole('button', { name: /Back to catalog/ }).click();
   await page.getByRole('img', { name: 'เสื้อกีฬาทดสอบ' }).waitFor();
   assert.equal((await db.query('SELECT name FROM catalog_items')).length, 1);
   await page.screenshot({ path: 'test-results/catalog-desktop.png', fullPage: true });
@@ -124,7 +127,7 @@ try {
   );
   await page.waitForFunction(
     () =>
-      [...document.querySelectorAll('.imported-catalog img')].length === 22 &&
+      [...document.querySelectorAll('.imported-catalog img')].length === 23 &&
       [...document.querySelectorAll('.imported-catalog img')].every(
         (i) => i.complete && i.naturalWidth > 0,
       ),
@@ -556,7 +559,7 @@ try {
   await pdfPrint.locator('.ps-print-root[data-ready="true"]').waitFor({ timeout: 60000 });
   assert.match(
     await pdfPrint.locator('.ps-document-warning').first().innerText(),
-    /มีใบผลิตฉบับใหม่กว่า/,
+    /ສະບັບເກົ່າ \/ SUPERSEDED/,
   );
   assert.equal(await pdfPrint.locator('.ps-attachment-page').count(), 0);
   await pdfPrint.close();

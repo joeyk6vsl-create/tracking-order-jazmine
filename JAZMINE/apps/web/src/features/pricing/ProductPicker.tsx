@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
 import type { CatalogItem } from '../../../../../packages/contracts/src/catalog';
-import { api } from '../../services/api';
+import { CatalogImage } from '../catalog/CatalogImage';
 function CollarButton({
   item,
   selected,
@@ -10,26 +9,19 @@ function CollarButton({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const [image, setImage] = useState<string | null>(null);
-  useEffect(() => {
-    let alive = true;
-    void api<{ image: string | null }>(`/catalog/${item.id}/image`)
-      .then((r) => {
-        if (alive) setImage(r.image);
-      })
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, [item.id]);
   return (
     <button
       type="button"
-      className={'panel catalog-card ' + (selected ? 'selected-option' : '')}
+      aria-label={item.name}
+      className={
+        'panel catalog-card ' +
+        (!item.hasImage ? 'fabric-option ' : '') +
+        (selected ? 'selected-option' : '')
+      }
       aria-pressed={selected}
       onClick={onSelect}
     >
-      {image && <img src={image} alt={item.name} loading="lazy" />}
+      <CatalogImage item={item} />
       <strong>{item.name}</strong>
     </button>
   );
@@ -46,12 +38,17 @@ export function ProductPicker({
   return (
     <div>
       <h3>เลือกคอเสื้อจากรูป</h3>
-      {[1, 2, 3].map((group) => (
+      {[1, 2, 3, 0].map((group) => (
         <section key={group}>
-          <h4>ชุด {group}</h4>
+          <h4>{group ? `ชุด ${group}` : 'ແບບອື່ນ / Other products'}</h4>
           <div className="option-grid">
             {items
-              .filter((i) => i.section === 'COLLAR' && i.displayGroup === group && i.active)
+              .filter(
+                (i) =>
+                  i.kind === 'PRODUCT' &&
+                  (group ? i.displayGroup === group : ![1, 2, 3].includes(i.displayGroup)) &&
+                  i.active,
+              )
               .map((i) => (
                 <CollarButton
                   key={i.id}

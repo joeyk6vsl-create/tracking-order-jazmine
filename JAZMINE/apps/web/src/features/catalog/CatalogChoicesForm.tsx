@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { CatalogItem } from '../../../../../packages/contracts/src/catalog';
 import type { CatalogChoices } from '../../../../../packages/contracts/src/catalog-choices';
 import { api, errorMessage } from '../../services/api';
+import { SIZES } from '../../../../../packages/contracts/src/pricing';
 
 export function CatalogChoicesForm({
   item,
@@ -74,23 +75,59 @@ export function CatalogChoicesForm({
         >
           <fieldset disabled={!canEdit || busy}>
             {item.kind === 'PRODUCT' && (
-              <label>
-                ไซซ์ที่เปิดให้เลือก (คั่นด้วยเครื่องหมาย ,)
-                <input
-                  aria-describedby="sizes-help"
-                  value={sizes}
-                  maxLength={840}
-                  onChange={(e) => setSizes(e.target.value)}
-                  placeholder="เช่น S, M, L, XL"
-                />
-                <small id="sizes-help">
-                  เรียงตามที่กรอก เช่น ไซซ์เด็กหรือไซซ์พิเศษก็ใส่เองได้
-                  เว้นว่างหมายถึงยังไม่ได้กำหนด
-                </small>
-              </label>
+              <div>
+                <p>Size · ກົດເລືອກ / Select sizes</p>
+                <div className="size-options">
+                  {SIZES.map((s) => {
+                    const current = sizes
+                      .split(',')
+                      .map((x) => x.trim())
+                      .filter(Boolean);
+                    const chosen = current.includes(s);
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        aria-pressed={chosen}
+                        className={chosen ? 'selected-option' : ''}
+                        onClick={() =>
+                          setSizes(
+                            (chosen ? current.filter((x) => x !== s) : [...current, s]).join(', '),
+                          )
+                        }
+                      >
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button type="button" onClick={() => setSizes(SIZES.join(', '))}>
+                  Select all standard sizes
+                </button>
+                <label>
+                  ไซซ์ที่เปิดให้เลือก (คั่นด้วยเครื่องหมาย ,)
+                  <input
+                    aria-describedby="sizes-help"
+                    value={sizes}
+                    maxLength={840}
+                    onChange={(e) => setSizes(e.target.value)}
+                    placeholder="เช่น S, M, L, XL"
+                  />
+                  <small id="sizes-help">
+                    เรียงตามที่กรอก เช่น ไซซ์เด็กหรือไซซ์พิเศษก็ใส่เองได้
+                    เว้นว่างหมายถึงยังไม่ได้กำหนด
+                  </small>
+                </label>
+              </div>
             )}
             <fieldset className="fabric-checks">
               <legend>ชนิดผ้าที่อนุญาต</legend>
+              <button
+                type="button"
+                onClick={() => setSelected(data.fabrics.filter((f) => f.active).map((f) => f.id))}
+              >
+                Select all active fabrics
+              </button>
               {!data.fabrics.length && <p>ยังไม่มีรายการผ้า</p>}
               {data.fabrics.map((f) => (
                 <label key={f.id}>

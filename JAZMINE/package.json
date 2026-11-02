@@ -19,7 +19,7 @@
     "lint": "eslint apps packages database/migrate.ts scripts tests eslint.config.mjs",
     "format:code": "prettier --write apps packages scripts tests database/migrate.ts *.json *.mjs",
     "test": "pnpm build:server && node --test --test-concurrency=1 dist/tests/integration/*.test.js",
-    "test:e2e": "pnpm build:server && node tests/e2e/identity-flow.mjs && node tests/e2e/tracking-reports-search.mjs && node tests/e2e/backups.mjs && node tests/e2e/production-revisions.mjs && node tests/e2e/production-reversals.mjs && node tests/e2e/issue-corrections.mjs && node tests/e2e/order-lifecycle.mjs && node tests/e2e/gift-only.mjs && node tests/e2e/invoice-tracking.mjs && node tests/e2e/quotations.mjs && node tests/e2e/stored-documents.mjs && node tests/e2e/payment-qr.mjs && node tests/e2e/archive-document-status.mjs",
+    "test:e2e": "pnpm build:server && node tests/e2e/identity-flow.mjs && node tests/e2e/tracking-reports-search.mjs && node tests/e2e/backups.mjs && node tests/e2e/production-revisions.mjs && node tests/e2e/production-reversals.mjs && node tests/e2e/issue-corrections.mjs && node tests/e2e/order-lifecycle.mjs && node tests/e2e/gift-only.mjs && node tests/e2e/invoice-tracking.mjs && node tests/e2e/quotations.mjs && node tests/e2e/stored-documents.mjs && node tests/e2e/payment-qr.mjs && node tests/e2e/archive-document-status.mjs && node tests/e2e/catalog-order-entry.mjs",
     "test:load": "pnpm build:server && node tests/load/local-volume.mjs latest",
     "db:migrate": "pnpm build:server && node dist/database/migrate.js"
   },

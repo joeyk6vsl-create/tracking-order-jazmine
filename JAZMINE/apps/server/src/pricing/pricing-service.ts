@@ -82,7 +82,7 @@ export class PricingService {
       )
     )[0];
     if (!product) throw new AppError('INVALID_PRODUCT', 'เลือกสินค้าที่ใช้งานได้', 400);
-    const group = view.config.collar[String(product.source_key)];
+    const group = view.config.collar[String(product.source_key ?? input.productId)];
     if (!group)
       throw new AppError('PRICE_GROUP_MISSING', 'ยังไม่กำหนดกลุ่มราคาของแบบเสื้อนี้', 409);
     if (
