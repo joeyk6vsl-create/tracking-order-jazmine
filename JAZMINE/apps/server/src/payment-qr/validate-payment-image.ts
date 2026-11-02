@@ -5,6 +5,8 @@ import QRCode from 'qrcode';
 import { validateAsset } from '../assets/file-validation';
 import { AppError } from '../errors';
 import type { PaymentQrCurrency } from '../../../../packages/contracts/src/payment-qr';
+import { readQrFields } from './payment-qr-fields';
+import { isSupportedLaoPersonalQr } from './lao-personal-qr';
 function fail(message: string): never {
   throw new AppError('INVALID_PAYMENT_QR', message, 400);
 }
@@ -29,19 +31,8 @@ export function validatePaymentPayload(text: string, currency: PaymentQrCurrency
     fail(
       'ອ່ານ QR ໄດ້ ແຕ່ຮູບແບບນີ້ຍັງບໍ່ຮອງຮັບ / QR was read, but this format is not supported. Use the original receiving QR from the bank app; share the image and bank name if it still fails. [QR-FORMAT]',
     );
-  const chars = Array.from(text),
-    values = new Map<string, string>();
-  let p = 0;
-  while (p < chars.length) {
-    const id = chars.slice(p, p + 2).join(''),
-      lenText = chars.slice(p + 2, p + 4).join('');
-    if (!/^\d{2}$/.test(id) || !/^\d{2}$/.test(lenText) || values.has(id)) fail(bad);
-    const len = Number(lenText);
-    if (!len || p + 4 + len > chars.length) fail(bad);
-    values.set(id, chars.slice(p + 4, p + 4 + len).join(''));
-    p += 4 + len;
-    if (id === '63' && p !== chars.length) fail(bad);
-  }
+  const values = readQrFields(text);
+  if (!values || [...values.keys()].at(-1) !== '63') fail(bad);
   if (
     values.get('00') !== '01' ||
     values.get('63')?.toUpperCase() !== paymentQrCrc(text.slice(0, -4)) ||
@@ -58,6 +49,7 @@ export function validatePaymentPayload(text: string, currency: PaymentQrCurrency
     fail('QR ນີ້ລັອກຍອດ ຫຼືໃຊ້ຄັ້ງດຽວ / Use a reusable QR without a fixed amount, tips or fees');
   if (values.get('53') !== (currency === 'LAK' ? '418' : '764'))
     fail('ສະກຸນເງິນ QR ບໍ່ກົງ / The QR currency does not match the selected currency');
+  if (isSupportedLaoPersonalQr(values)) return;
   if (
     ![...values.keys()].some((id) => Number(id) >= 2 && Number(id) <= 51) ||
     !/^\d{4}$/.test(values.get('52') ?? '') ||

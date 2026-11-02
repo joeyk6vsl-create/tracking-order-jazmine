@@ -110,8 +110,8 @@ export function SettingsForm({
         {item.enabled ? 'Enabled' : 'Disabled'}
       </h2>
       <p>
-        ໃຊ້ QR ຈາກທະນາຄານ ແບບໃຊ້ຊ້ຳ ແລະບໍ່ລັອກຍອດ / Upload a reusable bank merchant QR without a
-        fixed amount. PNG/JPEG/WebP · 1 MB
+        ໃຊ້ QR ຈາກທະນາຄານ ແບບໃຊ້ຊ້ຳ ແລະບໍ່ລັອກຍອດ / Upload a supported personal or merchant bank QR
+        without a fixed amount. PNG/JPEG/WebP · 1 MB
       </p>
       {(error || command.error) && (
         <p className="alert error" role="alert">

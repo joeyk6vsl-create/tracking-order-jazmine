@@ -7,7 +7,12 @@ import jsQR from 'jsqr';
 import { PDFDocument } from 'pdf-lib';
 import { productionFixture } from './helpers/production-fixture';
 import { reviseOrder } from './helpers/revise-order';
-import { fixtureBankInput, fixtureBankPayload } from './helpers/payment-qr-fixture';
+import {
+  fixtureBankInput,
+  fixtureBankPayload,
+  fixtureLaoPersonalPayload,
+  fixtureLaoPersonalInput,
+} from './helpers/payment-qr-fixture';
 import { syntheticPdf } from './helpers/document-pdf';
 import { PaymentQrService } from '../../apps/server/src/payment-qr/payment-qr-service';
 import {
@@ -36,6 +41,41 @@ const changed = (
   enabled,
   imageBase64: undefined,
   reason: 'เปลี่ยนข้อมูลทดสอบ',
+});
+test('Lao personal QR accepts the observed profile, preserves the payload, and rejects malformed or unsafe variants', async () => {
+  const sample = await fixtureLaoPersonalInput();
+  validatePaymentPayload(sample.payload, 'LAK');
+  const checked = await validatePaymentImage(sample.input.imageBase64, 'LAK');
+  const raster = await sharp(checked.printBytes)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  assert.equal(
+    jsQR(new Uint8ClampedArray(raster.data), raster.info.width, raster.info.height)?.data,
+    sample.payload,
+  );
+  assert.throws(() => validatePaymentPayload(sample.payload, 'THB'), code('INVALID_PAYMENT_QR'));
+  const variants: Record<string, string>[] = [
+    { '01': '12' },
+    { '54': '0' },
+    { '55': '01' },
+    { '58': 'TH' },
+    { '53': '764' },
+    { '38': '0016A0052662846625770108000000000203000' },
+    { '38': '0016A00526628466257701080000000001080000000002030000324TESTONLYNOTFORPAYMENT001' },
+    { '38': '0016A00526628466257701080000000002030000399SHORT' },
+    { '38': '0016A00526628466257801080000000002030000324TESTONLYNOTFORPAYMENT001' },
+    { '62': '0503ABC' },
+  ];
+  for (const overrides of variants)
+    assert.throws(
+      () => validatePaymentPayload(fixtureLaoPersonalPayload(overrides), 'LAK'),
+      code('INVALID_PAYMENT_QR'),
+    );
+  assert.throws(
+    () => validatePaymentPayload(sample.payload.slice(0, -4) + 'FFFF', 'LAK'),
+    code('INVALID_PAYMENT_QR'),
+  );
 });
 test('bank QR input accepts only LAK/THB, requires owner verification before enabling and refuses arbitrary business/QR payload fields', async () => {
   const { input } = await fixtureBankInput();

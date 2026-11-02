@@ -1,5 +1,7 @@
 # คู่มือโฟลเดอร์และไฟล์ JAZMINE
 
+การรองรับ Lao QR ส่วนตัวอยู่ใน `apps/server/src/payment-qr/lao-personal-qr.ts` อ่านช่องข้อมูลผ่าน `payment-qr-fields.ts` ส่วนการตรวจภาพและเงื่อนไขเงินยังอยู่ใน `validate-payment-image.ts` ไม่มีรูปหรือบัญชีจริงในไฟล์ทดสอบ รายละเอียดใน [คู่มือ QR](docs/PAYMENT_QR_TH.md)
+
 หน้ารับออเดอร์หลายไซซ์และแนบภาพแยกเป็น `OrderItemComposer`, `SizeQuantityTable`, `DraftLines`, `CustomerArtworkPicker` และ `useSaveDraftWithArtwork` เพื่อให้แต่ละส่วนมีหน้าที่เดียว รายละเอียดภาษาไทยพร้อมตารางชื่อไฟล์อยู่ใน [คู่มือรับออเดอร์หลายไซซ์](docs/ORDER_ENTRY_MULTI_SIZE_TH.md)
 
 การแก้เพิ่มรูปสินค้า รายการไม่มีภาพ ปุ่มผ้าและไซซ์ สินค้าเพิ่มเอง และปุ่มบันทึก QR พร้อมแผนผลกระทบและคำอธิบายหน้าที่ไฟล์ ดู [docs/CATALOG_ORDER_QR_FIX_TH.md](docs/CATALOG_ORDER_QR_FIX_TH.md)
