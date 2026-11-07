@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { createRequire } from 'node:module';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { chromium } from 'playwright';
 import sharp from 'sharp';
 
@@ -360,17 +360,34 @@ try {
     }, label);
     return Buffer.from(data, 'base64');
   }
-  for (const label of ['ป้ายคอ', 'เทปคอ', 'แบบตัวอย่าง']) {
+  const { AssetService } = require('../../dist/apps/server/src/assets/asset-service.js');
+  const {
+    AuthService,
+  } = require('../../dist/apps/server/src/identity/application/auth-service.js');
+  const owner = (await new AuthService(db, true).login('owner.test', password, '127.0.0.1')).user;
+  const assets = new AssetService(db);
+  for (const [kind, label] of [
+    ['NECK_LABEL', 'ป้ายคอ'],
+    ['NECK_TAPE', 'เทปคอ'],
+  ]) {
+    await assets.uploadLibrary(owner, randomUUID(), null, {
+      kind,
+      filename: label + '.png',
+      base64: (await printArtwork(label)).toString('base64'),
+    });
+  }
+  await page.getByRole('button', { name: 'โหลดไฟล์ล่าสุด' }).click();
+  for (const label of ['แบบตัวอย่าง']) {
     await page.getByLabel('แนบ' + label, { exact: true }).setInputFiles({
       name: label + '.png',
       mimeType: 'image/png',
       buffer: await printArtwork(label),
     });
-    await page.getByRole('button', { name: 'ส่ง' + label + 'รอตรวจ', exact: true }).click();
-    await page.getByRole('button', { name: 'อนุมัติ' + label, exact: true }).waitFor();
-    await page.getByLabel('เหตุผลการตรวจไฟล์', { exact: true }).fill('ตรวจ' + label + 'แล้วตรงแบบ');
-    await page.getByRole('button', { name: 'อนุมัติ' + label, exact: true }).click();
-    await page.getByText('เหตุผล: ตรวจ' + label + 'แล้วตรงแบบ', { exact: true }).waitFor();
+    await page.getByRole('button', { name: /Save mockup/ }).click();
+    await page
+      .getByText(/ฉบับล่าสุด · ผ่านตรวจแล้ว/)
+      .last()
+      .waitFor();
   }
   await page
     .getByText('ไฟล์ล่าสุดผ่านตรวจครบสำหรับร่างฉบับ 2 · ยังไม่ใช่การยืนยันออเดอร์', { exact: true })
@@ -943,6 +960,27 @@ try {
   await page.locator('[name=customerName]').fill('ทีมลูกค้าประจำฉบับปรับปรุง');
   await page.getByRole('button', { name: 'ບັນທຶກລູກຄ້າ', exact: true }).click();
   await page.getByRole('heading', { name: 'ทีมลูกค้าประจำฉบับปรับปรุง', exact: true }).waitFor();
+  const savedCustomer = (
+    await db.query("SELECT id,branding_type FROM customers WHERE name='ทีมลูกค้าประจำฉบับปรับปรุง'")
+  )[0];
+  assert.equal(savedCustomer.branding_type, 'CUSTOM_AGENT');
+  for (const label of ['ป้ายคอ', 'เทปคอ']) {
+    await page.getByLabel('แนบ' + label, { exact: true }).setInputFiles({
+      name: label + '.png',
+      mimeType: 'image/png',
+      buffer: await printArtwork(label),
+    });
+    await page.getByRole('button', { name: /Save brand file/ }).click();
+  }
+  await page.getByText(/Label and tape are ready/).waitFor();
+  assert.equal(
+    (
+      await db.query('SELECT kind FROM graphic_assets WHERE scope_key=$1', [
+        'CUSTOMER:' + savedCustomer.id,
+      ])
+    ).length,
+    2,
+  );
   await page.screenshot({ path: 'test-results/customer-profile-desktop.png', fullPage: true });
   await page.getByRole('button', { name: 'ລາຍຊື່ລູກຄ້າ', exact: true }).click();
   await page.getByRole('textbox', { name: 'ค้นหาลูกค้าประจำ', exact: true }).fill('02055551234');

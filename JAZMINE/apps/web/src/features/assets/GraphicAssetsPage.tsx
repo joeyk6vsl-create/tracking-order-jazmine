@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import type { GraphicQueueItem } from '../../../../../packages/contracts/src/assets';
 import { api, errorMessage } from '../../services/api';
+import { useSession } from '../auth/SessionProvider';
+import { BrandAssetLibrary } from './BrandAssetLibrary';
 import { DraftAssetsPanel } from './DraftAssetsPanel';
 export function GraphicAssetsPage() {
+  const { session } = useSession();
   const [drafts, setDrafts] = useState<GraphicQueueItem[]>([]),
     [selected, setSelected] = useState(''),
     [error, setError] = useState(''),
@@ -26,7 +29,11 @@ export function GraphicAssetsPage() {
   return (
     <>
       <h1>ไฟล์และงานกราฟิก</h1>
-      <p>เลือกร่างที่บันทึกไว้เพื่อตรวจไฟล์ · แสดงร่างล่าสุดสูงสุด 50 รายการ</p>
+      {session!.permissions.includes('customers.manage') && <BrandAssetLibrary name="JAZMINE" />}
+      <p>
+        ແບບຕົວຢ່າງຂອງແຕ່ລະອໍເດີ / Choose an order draft to view its current mockup. Latest 50
+        drafts.
+      </p>
       {error && <p role="alert">{error}</p>}
       {loading ? (
         <p role="status">กำลังโหลด…</p>

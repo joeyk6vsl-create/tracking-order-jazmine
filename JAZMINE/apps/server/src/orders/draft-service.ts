@@ -74,7 +74,7 @@ export class DraftService {
       if (data.customerId) {
         const customer = (
           await sql.query(
-            "SELECT name,phone FROM customers WHERE id=$1 AND status='ACTIVE' FOR SHARE",
+            "SELECT name,phone,branding_type FROM customers WHERE id=$1 AND status='ACTIVE' FOR SHARE",
             [data.customerId],
           )
         )[0];
@@ -82,6 +82,12 @@ export class DraftService {
           throw new AppError('CUSTOMER_UNAVAILABLE', 'ลูกค้าประจำนี้ไม่พร้อมใช้งาน', 400);
         if (customer.name !== data.customerName || customer.phone !== data.phone)
           throw new AppError('CUSTOMER_CHANGED', 'ข้อมูลลูกค้าเปลี่ยนแล้ว กรุณาเลือกใหม่', 409);
+        if (customer.branding_type !== data.brandingType)
+          throw new AppError(
+            'CUSTOMER_BRAND_CHANGED',
+            'แบรนด์ลูกค้าเปลี่ยนแล้ว กรุณาเลือกลูกค้าใหม่',
+            409,
+          );
       }
       const ids = (data.lines.length ? data.lines : [data.quote]).flatMap((line) => [
         line.productId,

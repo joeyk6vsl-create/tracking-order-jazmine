@@ -323,7 +323,7 @@ try {
   assert.equal(draft.quote_json.productionQuantity, 6);
   const uploaded = await db.query("SELECT id,status FROM graphic_assets WHERE kind='MOCKUP'");
   assert.equal(uploaded.length, 1);
-  assert.equal(uploaded[0].status, 'PENDING');
+  assert.equal(uploaded[0].status, 'APPROVED');
   assert.equal((await db.query('SELECT * FROM customers')).length, 0);
   // Required artwork/availability are set in the isolated fixture only; confirmation still checks them.
   await db.query("UPDATE catalog_items SET availability='AVAILABLE' WHERE id=ANY($1::uuid[])", [
@@ -333,21 +333,13 @@ try {
     png = await sharp({ create: { width: 20, height: 20, channels: 3, background: '#fff' } })
       .png()
       .toBuffer();
-  await assets.review(
-    login.user,
-    uploaded[0].id,
-    'APPROVED',
-    'TEST ONLY: customer artwork reviewed',
-  );
   for (const kind of ['NECK_LABEL', 'NECK_TAPE']) {
     const id = randomUUID();
-    await assets.upload(login.user, id, {
-      draftId: draft.id,
+    await assets.uploadLibrary(login.user, id, null, {
       kind,
       filename: kind + '.png',
       base64: png.toString('base64'),
     });
-    await assets.review(login.user, id, 'APPROVED', 'TEST ONLY');
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByLabel('กำหนดส่งสินค้า', { exact: true }).fill(businessDate());

@@ -1,5 +1,6 @@
 import { CalendarDays, ChevronLeft, Pencil, Phone, Tag } from 'lucide-react';
 import type { CustomerView } from '../../../../../packages/contracts/src/customers';
+import { BrandAssetLibrary } from '../assets/BrandAssetLibrary';
 
 interface Props {
   customer: CustomerView;
@@ -72,17 +73,19 @@ export function CustomerDetail({ customer, onBack, onEdit }: Props) {
               : 'ใช้แบรนด์หลักของร้าน'}
           </p>
           <p className="notice">
-            ไฟล์ป้ายคอและเทปคอจะเชื่อมในขั้นรูปภาพ ระบบออเดอร์ต้องตรวจความครบอีกครั้งก่อนยืนยัน
+            {customer.brandingType === 'CUSTOM_AGENT'
+              ? 'ບັນທຶກປ້າຍຄໍ ແລະເທບຄໍຂ້າງລຸ່ມ / Save this customer’s label and tape below. Future orders use them automatically.'
+              : 'ໃຊ້ປ້າຍຄໍ/ເທບຄໍ JAZMINE / Uses the shared JAZMINE label and tape.'}
           </p>
         </section>
       </div>
+      {customer.brandingType === 'CUSTOM_AGENT' && (
+        <BrandAssetLibrary key={customer.id} customerId={customer.id} name={customer.name} />
+      )}
       <section className="panel customer-notes">
         <h2>ໝາຍເຫດ</h2>
         <p>{customer.notes || 'ຍັງບໍ່ມີໝາຍເຫດ'}</p>
       </section>
-      <p className="panel-footnote">
-        ประวัติออเดอร์และยอดค้างจะเชื่อมเมื่อสร้างระบบออเดอร์ รุ่นนี้แสดงข้อมูลลูกค้าที่บันทึกจริง
-      </p>
     </>
   );
 }

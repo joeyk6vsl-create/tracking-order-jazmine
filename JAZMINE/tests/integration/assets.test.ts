@@ -9,6 +9,7 @@ import { validateAsset } from '../../apps/server/src/assets/file-validation';
 import {
   ASSET_KINDS,
   uploadAssetSchema,
+  uploadBrandAssetSchema,
   reviewAssetSchema,
 } from '../../packages/contracts/src/assets';
 import { createApplication } from '../../apps/server/src/app';
@@ -31,6 +32,10 @@ test('file checks reject active formats, oversized files, invalid base64 and uns
     false,
   );
   assert.equal(reviewAssetSchema.safeParse({ decision: 'APPROVED', reason: '' }).success, false);
+  assert.equal(
+    uploadBrandAssetSchema.safeParse({ kind: 'MOCKUP', filename: 'x.png', base64: png }).success,
+    false,
+  );
 });
 test('graphic files preserve versions, enforce approvals, share central branding and invalidate draft artwork', async () => {
   const db = await Database.open({ dataDir: ':memory:' });
@@ -84,9 +89,10 @@ test('graphic files preserve versions, enforce approvals, share central branding
         data = { draftId: first, kind, filename: kind + '.png', base64: png };
       await service.upload(admin, id, data);
       await service.upload(admin, id, data);
-      await assert.rejects(service.review(admin, id, 'APPROVED', 'Admin cannot approve'));
-      await service.review(graphic, id, 'APPROVED', 'ตรวจแล้วตรงแบบ');
-      await service.review(graphic, id, 'APPROVED', 'ตรวจแล้วตรงแบบ');
+      assert.equal(
+        (await service.checklist(admin, first)).assets.find((a) => a.id === id)?.status,
+        'APPROVED',
+      );
       assert.equal((await service.content(graphic, id)).bytes.toString('base64'), png);
     }
     assert.equal((await service.checklist(admin, first)).ready, true);
@@ -123,7 +129,7 @@ test('graphic files preserve versions, enforce approvals, share central branding
       3,
     );
     const pending = randomUUID();
-    await service.upload(admin, pending, {
+    await service.upload(graphic, pending, {
       draftId: first,
       kind: 'MOCKUP',
       filename: 'pending.png',
@@ -151,6 +157,71 @@ test('graphic files preserve versions, enforce approvals, share central branding
       1,
     );
     await assert.rejects(service.content(printing, guest));
+    const customerId = randomUUID();
+    await db.query(
+      "INSERT INTO customers(id,name,phone,normalized_phone,customer_group,branding_type,customer_since,created_by,updated_by) VALUES($1,'Venus','123456789','123456789','RETAIL','CUSTOM_AGENT',CURRENT_DATE,$2,$2)",
+      [customerId, owner.id],
+    );
+    await assert.rejects(service.library(printing, customerId));
+    assert.equal((await service.library(admin, customerId)).ready, false);
+    for (const kind of ['NECK_LABEL', 'NECK_TAPE'] as const) {
+      const id = randomUUID();
+      const data = { kind, filename: kind + '.png', base64: png };
+      const uploaded = await service.uploadLibrary(admin, id, customerId, data);
+      assert.equal(uploaded.asset.status, 'APPROVED');
+      assert.equal((await service.uploadLibrary(admin, id, customerId, data)).asset.id, id);
+      await assert.rejects(service.uploadLibrary(printing, randomUUID(), customerId, data));
+    }
+    assert.equal((await service.library(admin, customerId)).ready, true);
+    const venusDraft = randomUUID();
+    await db.query(
+      'INSERT INTO order_drafts(id,input_json,quote_json,selection_json,request_hash,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$6)',
+      [
+        venusDraft,
+        JSON.stringify({ customerId, customerName: 'Venus', brandingType: 'CUSTOM_AGENT' }),
+        '{}',
+        '[]',
+        'venus',
+        owner.id,
+      ],
+    );
+    assert.equal((await service.checklist(admin, venusDraft)).labelSource, 'CUSTOMER');
+    assert.equal(
+      (await service.checklist(admin, venusDraft)).assets.filter((a) => a.kind !== 'MOCKUP').length,
+      2,
+    );
+    await service.upload(admin, randomUUID(), {
+      draftId: venusDraft,
+      kind: 'MOCKUP',
+      filename: 'venus.png',
+      base64: png,
+    });
+    assert.equal((await service.checklist(admin, venusDraft)).ready, true);
+    assert.equal((await service.library(owner, null)).ready, true);
+    const centralId = randomUUID();
+    await service.uploadLibrary(owner, centralId, null, {
+      kind: 'NECK_LABEL',
+      filename: 'JAZMINE.png',
+      base64: png,
+    });
+    assert.equal((await service.library(admin, null)).assets[0].id, centralId);
+    assert.equal(
+      (await service.library(admin, customerId)).assets.some((a) => a.id === centralId),
+      false,
+    );
+    const graphicFile = randomUUID();
+    await service.upload(graphic, graphicFile, {
+      draftId: first,
+      kind: 'MOCKUP',
+      filename: 'graphic.png',
+      base64: png,
+    });
+    assert.equal(
+      (await service.checklist(admin, first)).assets.find((a) => a.id === graphicFile)?.status,
+      'PENDING',
+    );
+    await assert.rejects(service.review(printing, graphicFile, 'APPROVED', 'ไม่ได้รับสิทธิ์'));
+    await service.review(admin, graphicFile, 'APPROVED', 'แอดมินตรวจไฟล์เก่า');
     const app = await createApplication(
       { production: false, port: 3100, origin: 'http://localhost:5173', dataDir: ':memory:' },
       db,

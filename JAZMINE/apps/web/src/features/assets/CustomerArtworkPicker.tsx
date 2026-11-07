@@ -32,8 +32,8 @@ export function CustomerArtworkPicker({
     <section>
       <h3>ຮູບທີ່ລູກຄ້າສັ່ງ / Customer artwork</h3>
       <p>
-        PNG / JPEG / WebP / PDF · 2 MB. ບັນທຶກພ້ອມຮ່າງ ແລ້ວລໍຖ້າ Graphic ກວດ / Saved with the draft
-        for graphic review.
+        PNG / JPEG / WebP / PDF · 2 MB. ບັນທຶກກັບຮ່າງ / Save one current mockup with this order.
+        Admin uploads are ready immediately.
       </p>
       <input
         aria-label="Customer artwork"

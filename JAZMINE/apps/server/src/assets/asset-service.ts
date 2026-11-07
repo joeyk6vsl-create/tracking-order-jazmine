@@ -3,8 +3,10 @@ import type { UserView } from '../../../../packages/contracts/src/identity';
 import {
   ASSET_KINDS,
   ASSET_LABELS,
+  BRAND_ASSET_KINDS,
   type AssetView,
   type UploadAsset,
+  type UploadBrandAsset,
 } from '../../../../packages/contracts/src/assets';
 import type { DraftInput } from '../../../../packages/contracts/src/orders';
 import { Database, type Sql } from '../database';
@@ -24,6 +26,11 @@ function scope(draftId: string, input: DraftInput, kind: string) {
     : input.customerId
       ? 'CUSTOMER:' + input.customerId
       : 'DRAFT:' + draftId;
+}
+function labelSource(input: DraftInput): 'JAZMINE' | 'CUSTOMER' | 'DRAFT' | 'UNSET' {
+  if (!input.brandingType) return 'UNSET';
+  if (input.brandingType === 'JAZMINE_STANDARD') return 'JAZMINE';
+  return input.customerId ? 'CUSTOMER' : 'DRAFT';
 }
 export class AssetService {
   private auth = new ActorAuthorization();
@@ -82,7 +89,106 @@ export class AssetService {
             (latest.status === 'REJECTED' ? ' — ส่งกลับแก้ไข' : ' — รอกราฟิกตรวจ'),
         );
     }
-    return { assets, missing, ready: missing.length === 0, draftVersion: version };
+    return {
+      assets,
+      missing,
+      ready: missing.length === 0,
+      draftVersion: version,
+      labelSource: labelSource(input),
+    };
+  }
+  private async libraryScope(sql: Sql, customerId: string | null) {
+    if (!customerId) return 'CENTRAL:JAZMINE';
+    const customer = (
+      await sql.query('SELECT branding_type FROM customers WHERE id=$1', [customerId])
+    )[0];
+    if (!customer) throw new AppError('NOT_FOUND', 'ไม่พบลูกค้าประจำ', 404);
+    if (customer.branding_type !== 'CUSTOM_AGENT')
+      throw new AppError('JAZMINE_BRAND', 'ลูกค้ารายนี้ใช้ป้ายคอและเทปคอของ JAZMINE', 400);
+    return 'CUSTOMER:' + customerId;
+  }
+  async library(actor: UserView, customerId: string | null) {
+    await this.auth.require(this.db, actor, 'customers.manage');
+    const key = await this.libraryScope(this.db, customerId);
+    const assets = (await this.db.query(
+      `SELECT ${projection} FROM graphic_assets WHERE scope_key=$1 AND kind=ANY($2::text[]) ORDER BY kind,revision DESC`,
+      [key, BRAND_ASSET_KINDS],
+    )) as unknown as AssetView[];
+    const missing = BRAND_ASSET_KINDS.flatMap((kind) => {
+      const latest = assets.find((a) => a.kind === kind);
+      return !latest
+        ? [ASSET_LABELS[kind] + ' — ยังไม่มีไฟล์']
+        : latest.status !== 'APPROVED'
+          ? [ASSET_LABELS[kind] + ' — ยังไม่พร้อมใช้']
+          : [];
+    });
+    return { assets, missing, ready: missing.length === 0 };
+  }
+  async uploadLibrary(
+    actor: UserView,
+    id: string,
+    customerId: string | null,
+    data: UploadBrandAsset,
+  ) {
+    await this.auth.require(this.db, actor, 'customers.manage');
+    const { bytes, mime } = validateAsset(data.base64);
+    const requestHash = createHash('sha256')
+      .update(actor.id + String(customerId) + JSON.stringify(data))
+      .digest('hex');
+    return this.db.transaction(async (sql) => {
+      const fresh = await this.auth.require(sql, actor, 'customers.manage', true);
+      await sql.query('LOCK TABLE graphic_assets IN SHARE ROW EXCLUSIVE MODE');
+      const key = await this.libraryScope(sql, customerId);
+      const previous = (
+        await sql.query(`SELECT ${projection},request_hash FROM graphic_assets WHERE id=$1`, [id])
+      )[0];
+      if (previous) {
+        if (previous.request_hash !== requestHash || previous.scopeKey !== key)
+          throw new AppError(
+            'REQUEST_CONFLICT',
+            'คำขอเดิมมีไฟล์ต่างกัน กรุณาตรวจรายการล่าสุด',
+            409,
+          );
+        return { asset: previous };
+      }
+      const revision = Number(
+        (
+          await sql.query(
+            'SELECT COALESCE(MAX(revision),0)+1 AS next FROM graphic_assets WHERE scope_key=$1 AND kind=$2',
+            [key, data.kind],
+          )
+        )[0].next,
+      );
+      await sql.query(
+        'INSERT INTO graphic_assets(id,scope_key,kind,revision,filename,mime,file_data,byte_size,sha256,request_hash,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)',
+        [
+          id,
+          key,
+          data.kind,
+          revision,
+          data.filename,
+          mime,
+          bytes,
+          bytes.length,
+          createHash('sha256').update(bytes).digest('hex'),
+          requestHash,
+          actor.id,
+        ],
+      );
+      await sql.query(
+        "UPDATE graphic_assets SET status='APPROVED',reviewed_by=$2,review_reason='ตรวจโดยแอดมินขณะอัปโหลด',reviewed_at=now() WHERE id=$1",
+        [id, fresh.id],
+      );
+      await recordAudit(sql, actor.id, 'BRAND_FILE_UPLOADED', id, undefined, {
+        scope: key,
+        kind: data.kind,
+        revision,
+        approvedOnUpload: true,
+      });
+      return {
+        asset: (await sql.query(`SELECT ${projection} FROM graphic_assets WHERE id=$1`, [id]))[0],
+      };
+    });
   }
   async upload(actor: UserView, id: string, data: UploadAsset) {
     await this.access(this.db, actor);
@@ -91,7 +197,7 @@ export class AssetService {
       .update(actor.id + JSON.stringify(data))
       .digest('hex');
     return this.db.transaction(async (sql) => {
-      await this.access(sql, actor, true);
+      const fresh = await this.access(sql, actor, true);
       await sql.query('LOCK TABLE graphic_assets IN SHARE ROW EXCLUSIVE MODE');
       const previous = (
         await sql.query(`SELECT ${projection},request_hash FROM graphic_assets WHERE id=$1`, [id])
@@ -142,12 +248,19 @@ export class AssetService {
           actor.id,
         ],
       );
+      const approvedOnUpload = fresh.role === 'ADMIN_PROMAX' || fresh.department === 'ADMIN';
+      if (approvedOnUpload)
+        await sql.query(
+          "UPDATE graphic_assets SET status='APPROVED',reviewed_by=$2,review_reason='ตรวจโดยแอดมินขณะอัปโหลด',reviewed_at=now() WHERE id=$1",
+          [id, fresh.id],
+        );
       await recordAudit(sql, actor.id, 'GRAPHIC_FILE_UPLOADED', id, undefined, {
         scope: key,
         kind: data.kind,
         revision,
         draftId: data.draftId,
         draftVersion: draft.row_version,
+        approvedOnUpload,
       });
       return {
         asset: (await sql.query(`SELECT ${projection} FROM graphic_assets WHERE id=$1`, [id]))[0],
@@ -156,7 +269,12 @@ export class AssetService {
   }
   async review(actor: UserView, id: string, decision: 'APPROVED' | 'REJECTED', reason: string) {
     return this.db.transaction(async (sql) => {
-      await this.auth.require(sql, actor, 'graphic.approve', true);
+      if (actor.role === 'ADMIN_PROMAX' || actor.department === 'ADMIN')
+        await this.auth.require(sql, actor, 'orders.manage', true);
+      else if (actor.department === 'GRAPHIC')
+        await this.auth.require(sql, actor, 'graphic.approve', true);
+      else
+        throw new AppError('PERMISSION_DENIED', 'เฉพาะเจ้าของ แอดมิน หรือกราฟิกตรวจไฟล์ได้', 403);
       await sql.query('LOCK TABLE graphic_assets IN SHARE ROW EXCLUSIVE MODE');
       const asset = (
         await sql.query('SELECT * FROM graphic_assets WHERE id=$1 FOR UPDATE', [id])

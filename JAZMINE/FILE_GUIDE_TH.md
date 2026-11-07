@@ -1,5 +1,7 @@
 # คู่มือโฟลเดอร์และไฟล์ JAZMINE
 
+การเก็บป้ายคอและเทปคอประจำตัวลูกค้า คลังกลาง JAZMINE และแบบตัวอย่างหนึ่งชุดต่อออเดอร์ อธิบายวิธีใช้และหน้าที่ไฟล์ที่ [docs/REUSABLE_BRAND_FILES_TH.md](docs/REUSABLE_BRAND_FILES_TH.md)
+
 ปุ่มเพิ่มไซซ์และคำเตือนอยู่ใน `apps/web/src/features/orders/OrderItemComposer.tsx` การกรอกจำนวนและเครื่องหมายแถวที่เลือกอยู่ใน `SizeQuantityTable.tsx` สีแถวอยู่ใน `order-entry.css` งานคำนวณราคาและบันทึกใช้บริการเดิม ดู [คู่มือรับออเดอร์](docs/ORDER_ENTRY_MULTI_SIZE_TH.md)
 
 การรองรับ Lao QR ส่วนตัวอยู่ใน `apps/server/src/payment-qr/lao-personal-qr.ts` อ่านช่องข้อมูลผ่าน `payment-qr-fields.ts` ส่วนการตรวจภาพและเงื่อนไขเงินยังอยู่ใน `validate-payment-image.ts` ไม่มีรูปหรือบัญชีจริงในไฟล์ทดสอบ รายละเอียดใน [คู่มือ QR](docs/PAYMENT_QR_TH.md)

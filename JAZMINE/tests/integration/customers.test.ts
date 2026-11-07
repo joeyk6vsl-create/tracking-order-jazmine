@@ -175,6 +175,7 @@ test('customer migration upgrades an existing identity schema without changing e
       '0022_payment_qr.sql',
       '0023_production_review_reversal.sql',
       '0024_archive_automation.sql',
+      '0025_reusable_brand_assets.sql',
     ],
   );
 });

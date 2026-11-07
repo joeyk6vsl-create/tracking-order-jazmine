@@ -3,98 +3,17 @@ import {
   ASSET_KINDS,
   ASSET_LABELS,
   type AssetChecklist,
-  type UploadAsset,
 } from '../../../../../packages/contracts/src/assets';
 import { api, errorMessage } from '../../services/api';
 import { useSession } from '../auth/SessionProvider';
-import { readArtworkFile } from './read-artwork-file';
-function UploadFile({
-  draftId,
-  kind,
-  onUploaded,
-}: {
-  draftId: string;
-  kind: UploadAsset['kind'];
-  onUploaded: () => void;
-}) {
-  const [file, setFile] = useState<{ id: string; filename: string; base64: string } | null>(null),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState(''),
-    [uncertain, setUncertain] = useState(false);
-  async function pick(value?: File) {
-    setFile(null);
-    setError('');
-    setUncertain(false);
-    if (!value) return;
-    setBusy(true);
-    try {
-      setFile(await readArtworkFile(value));
-    } catch (e) {
-      setError(errorMessage(e));
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function upload() {
-    if (!file) return;
-    setBusy(true);
-    setError('');
-    try {
-      await api(`/graphic-assets/${file.id}`, 'PUT', {
-        draftId,
-        kind,
-        filename: file.filename,
-        base64: file.base64,
-      });
-      setFile(null);
-      setUncertain(false);
-      onUploaded();
-    } catch (e) {
-      setError(errorMessage(e));
-      setUncertain(true);
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <div>
-      <label>
-        แนบ{ASSET_LABELS[kind]}
-        <input
-          aria-label={'แนบ' + ASSET_LABELS[kind]}
-          disabled={busy || uncertain}
-          type="file"
-          accept="image/png,image/jpeg,image/webp,application/pdf"
-          onChange={(e) => {
-            void pick(e.target.files?.[0]);
-            e.target.value = '';
-          }}
-        />
-      </label>
-      {file && <p>เตรียมส่ง: {file.filename}</p>}
-      {file && (
-        <button disabled={busy} onClick={() => void upload()}>
-          {uncertain ? 'ตรวจคำขอเดิมอีกครั้ง' : 'ส่ง' + ASSET_LABELS[kind] + 'รอตรวจ'}
-        </button>
-      )}
-      {error && <p role="alert">{error}</p>}
-      {uncertain && (
-        <button
-          disabled={busy}
-          onClick={() => {
-            setUncertain(false);
-            setFile(null);
-          }}
-        >
-          เลือกไฟล์ใหม่ (ตรวจประวัติก่อน)
-        </button>
-      )}
-    </div>
-  );
-}
+import { AssetUpload } from './AssetUpload';
 export function DraftAssetsPanel({ draftId }: { draftId: string }) {
   const { session } = useSession(),
-    canReview = session!.permissions.includes('graphic.approve');
+    canReview =
+      session!.user!.role === 'ADMIN_PROMAX' ||
+      ['ADMIN', 'GRAPHIC'].includes(session!.user!.department),
+    readyImmediately =
+      session!.user!.role === 'ADMIN_PROMAX' || session!.user!.department === 'ADMIN';
   const [data, setData] = useState<AssetChecklist | null>(null),
     [reload, setReload] = useState(0),
     [error, setError] = useState(''),
@@ -131,17 +50,17 @@ export function DraftAssetsPanel({ draftId }: { draftId: string }) {
   }
   return (
     <section className="panel pricing-panel">
-      <h2>ไฟล์และการตรวจกราฟิก</h2>
+      <h2>ໄຟລ໌ອໍເດີ / Order files</h2>
       <button disabled={busy} onClick={() => setReload((n) => n + 1)}>
         โหลดไฟล์ล่าสุด
       </button>
       <p>
-        PNG / JPEG / WebP / PDF ไม่เกิน 2 MB ต่อไฟล์ ·
-        ไฟล์ใหม่ยังไม่ถือว่าผ่านจนกราฟิกหรือเจ้าของตรวจ
+        PNG / JPEG / WebP / PDF · 2 MB per file. ແອດມິນອັບໂຫຼດແລ້ວໃຊ້ໄດ້ / Admin uploads are ready
+        immediately.
       </p>
       <p>
-        ป้ายคอ/เทปคอ JAZMINE ใช้คลังกลาง แบรนด์ลูกค้าประจำใช้คลังของลูกค้านั้น ขาจรใช้ไฟล์เฉพาะร่าง
-        แบบตัวอย่างเป็นไฟล์เฉพาะร่างเสมอ
+        ປ້າຍຄໍ/ເທບຄໍໃຊ້ຈາກຄັງຂອງ JAZMINE ຫຼືລູກຄ້າປະຈຳ / Label and tape come from the saved brand
+        library. ແບບຕົວຢ່າງໃສ່ຕໍ່ອໍເດີ / Add one current mockup for this order.
       </p>
       {error && (
         <p className="alert error" role="alert">
@@ -178,15 +97,28 @@ export function DraftAssetsPanel({ draftId }: { draftId: string }) {
           )}
           {ASSET_KINDS.map((kind) => {
             const files = data.assets.filter((a) => a.kind === kind);
+            const uploadHere = kind === 'MOCKUP' || data.labelSource === 'DRAFT';
             return (
               <section className="asset-kind" key={kind}>
                 <h3>{ASSET_LABELS[kind]}</h3>
-                <UploadFile
-                  key={draftId + kind}
-                  draftId={draftId}
-                  kind={kind}
-                  onUploaded={() => setReload((n) => n + 1)}
-                />
+                {uploadHere ? (
+                  <AssetUpload
+                    key={draftId + kind}
+                    path="/graphic-assets"
+                    draftId={draftId}
+                    kind={kind}
+                    readyImmediately={readyImmediately}
+                    onUploaded={() => setReload((n) => n + 1)}
+                  />
+                ) : (
+                  <p>
+                    {data.labelSource === 'CUSTOMER'
+                      ? 'ໄຟລ໌ລູກຄ້າປະຈຳ / Set this once in the customer profile.'
+                      : data.labelSource === 'JAZMINE'
+                        ? 'ໄຟລ໌ JAZMINE / Set this once in the JAZMINE library under Graphic assets.'
+                        : 'ເລືອກແບຣນກ່ອນ / Choose the brand first.'}
+                  </p>
+                )}
                 {files.map((file, index) => (
                   <article className="asset-version" key={file.id}>
                     <strong>

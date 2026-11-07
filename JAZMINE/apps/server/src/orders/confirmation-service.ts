@@ -57,15 +57,18 @@ export class ConfirmationService {
     if (!data.brandingType) missing.push('ยังไม่เลือกแบรนด์');
     if (data.customerId) {
       const customer = (
-        await sql.query('SELECT name,phone,status FROM customers WHERE id=$1', [data.customerId])
+        await sql.query('SELECT name,phone,status,branding_type FROM customers WHERE id=$1', [
+          data.customerId,
+        ])
       )[0];
       if (
         !customer ||
         customer.status !== 'ACTIVE' ||
         customer.name !== data.customerName ||
-        customer.phone !== data.phone
+        customer.phone !== data.phone ||
+        customer.branding_type !== data.brandingType
       )
-        missing.push('ข้อมูลลูกค้าประจำเปลี่ยนหรือปิดใช้งาน กรุณาเลือกและบันทึกใหม่');
+        missing.push('ข้อมูลหรือแบรนด์ลูกค้าประจำเปลี่ยน กรุณาเลือกและบันทึกใหม่');
     }
     const lines = data.lines.length ? data.lines : [data.quote];
     const ids = [

@@ -23,7 +23,7 @@ export function CustomerForm({ customer, canChangeStatus, onSaved, onCancel }: P
     name: customer?.name ?? '',
     phone: customer?.phone ?? '',
     group: customer?.group ?? 'RETAIL',
-    brandingType: customer?.brandingType ?? 'JAZMINE_STANDARD',
+    brandingType: customer?.brandingType ?? 'CUSTOM_AGENT',
     customerSince: customer?.customerSince ?? businessDate(),
     notes: customer?.notes ?? '',
   });
@@ -201,8 +201,8 @@ export function CustomerForm({ customer, canChangeStatus, onSaved, onCancel }: P
           </div>
         )}
         <p className="field-help">
-          ป้ายคอและเทปคอจะตั้งค่าในขั้นระบบไฟล์ภาพ
-          การบันทึกชื่อแบรนด์ยังไม่ใช่การรับรองว่าไฟล์ผลิตครบ
+          ບັນທຶກລູກຄ້າກ່ອນ ແລ້ວໃສ່ປ້າຍຄໍ ແລະເທບຄໍໃນໜ້າລູກຄ້າ / Save the customer, then add their
+          neck label and tape on the customer page.
         </p>
         {uncertain && (
           <p className="alert warning" role="status">

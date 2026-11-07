@@ -50,7 +50,7 @@ export function DraftEditor({
     [fixed, setFixed] = useState(String(draft?.input.quote.fixed ?? 0)),
     [automatic, setAutomatic] = useState(draft?.input.quote.applyBuyGet ?? false),
     [reason, setReason] = useState(draft ? '' : 'สร้างร่างออเดอร์'),
-    [brand, setBrand] = useState(draft?.input.brandingType ?? ''),
+    [brand, setBrand] = useState(draft?.input.brandingType ?? 'JAZMINE_STANDARD'),
     [notes, setNotes] = useState(draft?.input.assetNotes ?? ''),
     [pricing, setPricing] = useState<PricingView | null>(null),
     [items, setItems] = useState<CatalogItem[]>([]),
@@ -203,6 +203,7 @@ export function DraftEditor({
               onChange={(e) => {
                 setName(e.target.value);
                 setCustomerId(null);
+                setBrand('JAZMINE_STANDARD');
               }}
             />
           </label>
@@ -215,6 +216,7 @@ export function DraftEditor({
               onChange={(e) => {
                 setPhone(e.target.value);
                 setCustomerId(null);
+                setBrand('JAZMINE_STANDARD');
               }}
             />
           </label>
@@ -233,6 +235,7 @@ export function DraftEditor({
                   setName(c.name);
                   setPhone(c.phone);
                   setGroup(c.group);
+                  setBrand(c.brandingType);
                   setMatches([]);
                 }}
               >
@@ -245,13 +248,23 @@ export function DraftEditor({
             <select
               aria-label="แบรนด์ของร่าง"
               value={brand}
+              disabled={Boolean(customerId)}
               onChange={(e) => setBrand(e.target.value as typeof brand)}
             >
-              <option value="">ยังไม่เลือก</option>
               <option value="JAZMINE_STANDARD">JAZMINE</option>
-              <option value="CUSTOM_AGENT">แบรนด์ลูกค้า</option>
+              {(customerId ||
+                (draft?.input.brandingType === 'CUSTOM_AGENT' && !draft.input.customerId)) && (
+                <option value="CUSTOM_AGENT">แบรนด์ลูกค้า</option>
+              )}
             </select>
           </label>
+          {customerId && (
+            <p>
+              {brand === 'CUSTOM_AGENT'
+                ? "ໃຊ້ປ້າຍຄໍ/ເທບຄໍຂອງລູກຄ້ານີ້ / Uses this customer's saved label and tape."
+                : 'ໃຊ້ປ້າຍຄໍ/ເທບຄໍ JAZMINE / Uses the shared JAZMINE label and tape.'}
+            </p>
+          )}
           <label>
             บันทึกสิ่งที่ต้องตามเรื่องไฟล์
             <textarea maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} />

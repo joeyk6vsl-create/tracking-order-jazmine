@@ -120,7 +120,6 @@ test('confirmation checks current data atomically, prevents duplicate numbers an
         filename: kind + '.png',
         base64: png,
       });
-      await assets.review(graphic, assetId, 'APPROVED', 'ตรวจแล้ว');
       return assetId;
     }
     const labelId = await file('NECK_LABEL');
@@ -193,7 +192,7 @@ test('confirmation checks current data atomically, prevents duplicate numbers an
     assert((old.snapshot as typeof one.order.snapshot).selections.some((i) => i.name === 'ຄໍມົນ'));
     assert((old.snapshot as typeof one.order.snapshot).assets.some((a) => a.id === labelId));
     const newLabel = randomUUID();
-    await assets.upload(admin, newLabel, {
+    await assets.upload(graphic, newLabel, {
       draftId: id,
       kind: 'NECK_LABEL',
       filename: 'new.png',
