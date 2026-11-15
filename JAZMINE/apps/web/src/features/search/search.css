@@ -6,7 +6,7 @@
   margin: 20px 0;
 }
 .search-results li {
-  border-bottom: 1px solid #dfe5ed;
+  border-bottom: 1px solid var(--line);
   padding: 16px 0;
   overflow-wrap: anywhere;
 }

@@ -1,5 +1,7 @@
 # คู่มือโฟลเดอร์และไฟล์ JAZMINE
 
+โหมดมืด ปุ่มสลับสี การจำค่าบนเครื่อง มือถือ และเอกสารที่ยังพิมพ์พื้นขาว อธิบายหน้าที่ไฟล์เป็นภาษาไทยใน [docs/DARK_MODE_TH.md](docs/DARK_MODE_TH.md)
+
 การเก็บป้ายคอและเทปคอประจำตัวลูกค้า คลังกลาง JAZMINE และแบบตัวอย่างหนึ่งชุดต่อออเดอร์ อธิบายวิธีใช้และหน้าที่ไฟล์ที่ [docs/REUSABLE_BRAND_FILES_TH.md](docs/REUSABLE_BRAND_FILES_TH.md)
 
 ปุ่มเพิ่มไซซ์และคำเตือนอยู่ใน `apps/web/src/features/orders/OrderItemComposer.tsx` การกรอกจำนวนและเครื่องหมายแถวที่เลือกอยู่ใน `SizeQuantityTable.tsx` สีแถวอยู่ใน `order-entry.css` งานคำนวณราคาและบันทึกใช้บริการเดิม ดู [คู่มือรับออเดอร์](docs/ORDER_ENTRY_MULTI_SIZE_TH.md)

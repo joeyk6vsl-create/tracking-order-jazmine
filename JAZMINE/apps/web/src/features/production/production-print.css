@@ -13,10 +13,10 @@
   margin: 12px 0;
 }
 .ps-print-root {
-  background: #e9edf2;
+  background: var(--canvas);
   min-height: 100vh;
   padding: 24px;
-  color: #181818;
+  color: var(--ink);
 }
 .ps-toolbar {
   max-width: 1000px;
@@ -38,6 +38,7 @@
 }
 .ps-page {
   font-family: 'Noto Sans Lao', 'Noto Sans Thai', sans-serif;
+  color: #181818;
   font-size: 9pt;
   line-height: 1.35;
   background: white;

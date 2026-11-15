@@ -35,12 +35,12 @@
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  border-bottom: 1px solid #dfe5ed;
+  border-bottom: 1px solid var(--line);
   padding: 10px 0;
 }
 .tracking-request {
   padding: 18px 0;
-  border-top: 1px solid #dfe5ed;
+  border-top: 1px solid var(--line);
 }
 .tracking-internal {
   display: grid;

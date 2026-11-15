@@ -40,7 +40,7 @@
 .report-table td {
   padding: 14px;
   text-align: left;
-  border-bottom: 1px solid #dfe5ed;
+  border-bottom: 1px solid var(--line);
 }
 .report-trend {
   display: grid;
@@ -52,7 +52,7 @@
   gap: 5px;
 }
 .report-bar {
-  background: #0066cc;
+  background: var(--primary-bg);
   height: 12px;
   border-radius: 8px;
   min-width: 0;

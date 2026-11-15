@@ -24,7 +24,7 @@
 .settlement-totals > div {
   display: grid;
   gap: 8px;
-  background: var(--surface-muted, #f3f5f9);
+  background: var(--surface-muted);
   padding: 18px;
   border-radius: 12px;
 }
@@ -40,7 +40,7 @@
 }
 .settlement-record {
   padding: 20px 0;
-  border-top: 1px solid #dce2eb;
+  border-top: 1px solid var(--line);
   overflow-wrap: anywhere;
 }
 .settlement-buttons {
@@ -70,7 +70,7 @@
 .settlement-table td {
   text-align: left;
   padding: 10px;
-  border-bottom: 1px solid #dce2eb;
+  border-bottom: 1px solid var(--line);
 }
 .settlement-page fieldset {
   min-width: 0;

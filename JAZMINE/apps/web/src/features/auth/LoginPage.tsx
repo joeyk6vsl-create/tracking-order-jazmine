@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { ArrowRight, LockKeyhole, ShieldCheck, Shirt } from 'lucide-react';
 import { api, errorMessage } from '../../services/api';
 import { useSession } from './SessionProvider';
+import { ThemeToggle } from '../theme/ThemeProvider';
 
 export function LoginPage() {
   const { session, refresh } = useSession();
@@ -64,6 +65,9 @@ export function LoginPage() {
         <p className="brand-footer">JAZMINE · ORGANIZED TO CREATE</p>
       </section>
       <main className="login-main">
+        <div className="login-theme-switch">
+          <ThemeToggle />
+        </div>
         <div className="login-card">
           <span className="section-label">
             <LockKeyhole size={16} /> ພື້ນທີ່ສຳລັບທີມງານ

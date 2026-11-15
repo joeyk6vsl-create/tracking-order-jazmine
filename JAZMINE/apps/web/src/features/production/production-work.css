@@ -43,16 +43,16 @@
   font-size: 13px;
   padding: 5px 10px;
   border-radius: 8px;
-  background: #edf1f6;
+  background: var(--surface-muted);
   overflow-wrap: anywhere;
 }
 .work-state.IN_PROGRESS {
-  background: #e4f0ff;
-  color: #0653a6;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 .work-state.COMPLETED {
-  background: #dcf5e8;
-  color: #12643a;
+  background: var(--success-soft);
+  color: var(--success-ink);
 }
 .work-stage-grid,
 .work-file-grid {
@@ -61,7 +61,7 @@
   gap: 16px;
 }
 .work-stage-card {
-  border: 1px solid #dfe5ed;
+  border: 1px solid var(--line);
   border-radius: 14px;
   padding: 18px;
   display: grid;
@@ -76,7 +76,7 @@
   font-size: 13px;
 }
 .work-file-grid article {
-  border: 1px solid #dfe5ed;
+  border: 1px solid var(--line);
   border-radius: 12px;
   display: grid;
   gap: 8px;

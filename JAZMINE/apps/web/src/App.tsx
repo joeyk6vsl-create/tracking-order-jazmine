@@ -14,6 +14,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useSession } from './features/auth/SessionProvider';
+import { ThemeToggle } from './features/theme/ThemeProvider';
 import { LoginPage } from './features/auth/LoginPage';
 import { ChangePasswordPage } from './features/auth/ChangePasswordPage';
 import { UserManagementPage } from './features/users/UserManagementPage';
@@ -242,9 +243,14 @@ export function App() {
     );
   if (location.hash.startsWith('#track='))
     return (
-      <Suspense fallback={<main className="center-state">Loading…</main>}>
-        <PublicTrackingPage key={location.hash} token={location.hash.slice(7)} />
-      </Suspense>
+      <>
+        <div className="public-theme-switch">
+          <ThemeToggle />
+        </div>
+        <Suspense fallback={<main className="center-state">Loading…</main>}>
+          <PublicTrackingPage key={location.hash} token={location.hash.slice(7)} />
+        </Suspense>
+      </>
     );
   if (!session?.user) return <LoginPage />;
   const user = session.user;
@@ -502,6 +508,7 @@ export function App() {
             </strong>
           </div>
           <div className="account-summary">
+            <ThemeToggle />
             <span className="avatar small">{user.displayName.slice(0, 1)}</span>
             <span>
               <strong>{user.displayName}</strong>

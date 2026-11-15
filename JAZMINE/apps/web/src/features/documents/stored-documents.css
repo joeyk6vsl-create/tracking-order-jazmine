@@ -1,21 +1,21 @@
 .stored-document {
-  border: 1px solid #dce5ed;
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 16px;
   margin: 18px 0;
   min-width: 0;
   overflow-wrap: anywhere;
-  background: #f7fafc;
-  color: #153149;
+  background: var(--surface-muted);
+  color: var(--ink);
 }
 .stored-document button {
   max-width: 100%;
   white-space: normal;
 }
 .document-current-status {
-  border: 1px solid #c08429;
-  background: #fff8e7;
-  color: #653f09;
+  border: 1px solid var(--warning-border);
+  background: var(--warning-soft);
+  color: var(--warning-ink);
   padding: 12px;
   margin: 12px 0;
   overflow-wrap: anywhere;

@@ -3,8 +3,8 @@
   overflow-wrap: anywhere;
 }
 .lifecycle-clear {
-  background: #eefaf4;
-  border: 1px solid #a3d9be;
+  background: var(--success-soft);
+  border: 1px solid var(--success-ink);
   border-radius: 12px;
   padding: 14px;
 }
@@ -20,7 +20,7 @@
 }
 .lifecycle-effects p,
 .lifecycle-history article {
-  border: 1px solid #dfe5ed;
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px;
 }

@@ -10,7 +10,7 @@
   min-width: 0;
 }
 .correction-line {
-  border: 1px solid #dfe5ed;
+  border: 1px solid var(--line);
   border-radius: 12px;
   margin: 14px 0;
   padding: 16px;

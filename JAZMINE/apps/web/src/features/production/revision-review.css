@@ -8,7 +8,7 @@
   min-width: 0;
 }
 .revision-source {
-  border: 1px solid #dfe5ed;
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 18px;
   margin: 18px 0;
@@ -17,7 +17,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  border-top: 1px solid #dfe5ed;
+  border-top: 1px solid var(--line);
   padding: 14px 0;
 }
 .revision-line > p {

@@ -38,7 +38,7 @@
 .quotation-panel th,
 .quotation-panel td {
   padding: 8px;
-  border-bottom: 1px solid #dfe5ed;
+  border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
 }
@@ -71,7 +71,7 @@
 }
 .quotation-disclaimer {
   font-size: 0.85rem;
-  color: #526078;
+  color: var(--muted);
 }
 @media (max-width: 600px) {
   .quotation-heading,

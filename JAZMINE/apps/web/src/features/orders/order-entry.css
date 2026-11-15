@@ -10,10 +10,10 @@
 .size-quantity-table th,
 .size-quantity-table td {
   padding: 8px 4px;
-  border-bottom: 1px solid var(--border, #dce2eb);
+  border-bottom: 1px solid var(--line);
 }
 .size-quantity-table .size-row-selected {
-  background: #eef8f2;
+  background: var(--success-soft);
 }
 .size-quantity-table th:first-child {
   width: 18%;

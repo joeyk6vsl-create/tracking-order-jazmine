@@ -18,7 +18,7 @@
 .payment-qr-controls {
   margin-top: 16px;
   padding: 16px;
-  border: 1px solid #dce5ed;
+  border: 1px solid var(--line);
   border-radius: 12px;
 }
 .payment-qr-controls label.payment-qr-toggle,
@@ -57,7 +57,7 @@
 .invoice-payment-qr {
   flex: 1;
   min-width: 220px;
-  border: 1px solid #dce5ed;
+  border: 1px solid var(--line);
   padding: 14px;
   background: white;
   color: #152d46;
