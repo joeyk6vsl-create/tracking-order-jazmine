@@ -6,6 +6,7 @@ import type {
 } from '../../../../../packages/contracts/src/confirmation';
 import { api, ApiError, errorMessage } from '../../services/api';
 import { InvoiceView } from './InvoiceView';
+import { ActionButton } from '../../components/ActionButton';
 export function ConfirmationPanel({ draft }: { draft: DraftView }) {
   const [dueDate, setDueDate] = useState(''),
     [reason, setReason] = useState(''),
@@ -102,7 +103,9 @@ export function ConfirmationPanel({ draft }: { draft: DraftView }) {
             }}
           />
         </label>
-        <button disabled={busy || uncertain}>ตรวจความพร้อมก่อนยืนยัน</button>
+        <ActionButton action="check" type="submit" disabled={busy || uncertain}>
+          ตรวจความพร้อมก่อนยืนยัน
+        </ActionButton>
       </form>
       {checked && (
         <div role="status">
@@ -141,13 +144,14 @@ export function ConfirmationPanel({ draft }: { draft: DraftView }) {
                   onChange={(e) => setReason(e.target.value)}
                 />
               </label>
-              <button
+              <ActionButton
+                action="approve"
                 className="primary"
                 disabled={busy || !reason.trim()}
                 onClick={() => void confirm()}
               >
                 {uncertain ? 'ลองยืนยันคำขอเดิม' : 'ยืนยันออเดอร์'}
-              </button>
+              </ActionButton>
             </>
           )}
         </div>

@@ -1,4 +1,5 @@
 import type { PricingQuote, QuoteResult } from '../../../../../packages/contracts/src/pricing';
+import { Minus, Plus } from 'lucide-react';
 
 export type SizeCount = { quantity: number; freeQuantity: number };
 export function SizeQuantityTable({
@@ -46,7 +47,7 @@ export function SizeQuantityTable({
                       disabled={count.quantity <= 0}
                       onClick={() => onChange(size, { ...count, quantity: count.quantity - 1 })}
                     >
-                      −
+                      <Minus size={18} aria-hidden="true" />
                     </button>
                     <input
                       aria-label={`Quantity ${size}`}
@@ -66,7 +67,7 @@ export function SizeQuantityTable({
                       disabled={count.quantity >= 10000}
                       onClick={() => onChange(size, { ...count, quantity: count.quantity + 1 })}
                     >
-                      +
+                      <Plus size={18} aria-hidden="true" />
                     </button>
                   </div>
                 </td>

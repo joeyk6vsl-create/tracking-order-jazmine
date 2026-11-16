@@ -1,4 +1,5 @@
 import type { SheetInput } from '../../../../../packages/contracts/src/production';
+import { ActionButton } from '../../components/ActionButton';
 export function PrintDetailsEditor({
   value,
   onChange,
@@ -84,16 +85,18 @@ export function PrintDetailsEditor({
               }
             />
           </label>
-          <button
+          <ActionButton
+            action="remove"
             type="button"
             aria-label={`ลบรายชื่อ ${index + 1}`}
             onClick={() => onChange({ ...value, names: value.names.filter((_, i) => i !== index) })}
           >
             ลบ
-          </button>
+          </ActionButton>
         </div>
       ))}
-      <button
+      <ActionButton
+        action="add"
         type="button"
         disabled={!lines.length || value.names.length >= 2000}
         onClick={() =>
@@ -104,7 +107,7 @@ export function PrintDetailsEditor({
         }
       >
         เพิ่มชื่อและเบอร์เสื้อ
-      </button>
+      </ActionButton>
     </div>
   );
 }

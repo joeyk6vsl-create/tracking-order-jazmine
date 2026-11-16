@@ -3,6 +3,7 @@ import QRCode from 'qrcode';
 import type { QuotationView } from '../../../../../packages/contracts/src/quotations';
 import { errorMessage } from '../../services/api';
 import { QuotationContents } from './QuotationContents';
+import { ActionButton } from '../../components/ActionButton';
 import './quotations.css';
 import { StoredDocumentPanel } from '../documents/StoredDocumentPanel';
 import {
@@ -44,13 +45,14 @@ export function QuotationDocument({ document }: { document: QuotationView }) {
         version={document.revision}
       />
       {error && <p role="alert">{error}</p>}
-      <button
+      <ActionButton
+        action="print"
         className="primary no-print"
         disabled={!qr || current.busy}
         onClick={() => void current.print()}
       >
         ພິມ / Print quotation PDF
-      </button>
+      </ActionButton>
       <article className="panel quotation-print" data-revision-id={document.id}>
         <CurrentDocumentBanner status={current.status} />
         {current.error && (

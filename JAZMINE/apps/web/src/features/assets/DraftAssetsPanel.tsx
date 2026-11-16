@@ -7,6 +7,7 @@ import {
 import { api, errorMessage } from '../../services/api';
 import { useSession } from '../auth/SessionProvider';
 import { AssetUpload } from './AssetUpload';
+import { ActionButton } from '../../components/ActionButton';
 export function DraftAssetsPanel({ draftId }: { draftId: string }) {
   const { session } = useSession(),
     canReview =
@@ -51,9 +52,9 @@ export function DraftAssetsPanel({ draftId }: { draftId: string }) {
   return (
     <section className="panel pricing-panel">
       <h2>ໄຟລ໌ອໍເດີ / Order files</h2>
-      <button disabled={busy} onClick={() => setReload((n) => n + 1)}>
+      <ActionButton action="refresh" disabled={busy} onClick={() => setReload((n) => n + 1)}>
         โหลดไฟล์ล่าสุด
-      </button>
+      </ActionButton>
       <p>
         PNG / JPEG / WebP / PDF · 2 MB per file. ແອດມິນອັບໂຫຼດແລ້ວໃຊ້ໄດ້ / Admin uploads are ready
         immediately.
@@ -151,18 +152,20 @@ export function DraftAssetsPanel({ draftId }: { draftId: string }) {
                     </a>
                     {canReview && index === 0 && file.status === 'PENDING' && !file.stale && (
                       <div>
-                        <button
+                        <ActionButton
+                          action="approve"
                           disabled={busy || !reason.trim()}
                           onClick={() => void review(file.id, 'APPROVED')}
                         >
                           อนุมัติ{ASSET_LABELS[kind]}
-                        </button>
-                        <button
+                        </ActionButton>
+                        <ActionButton
+                          action="reject"
                           disabled={busy || !reason.trim()}
                           onClick={() => void review(file.id, 'REJECTED')}
                         >
                           ส่ง{ASSET_LABELS[kind]}กลับแก้
-                        </button>
+                        </ActionButton>
                       </div>
                     )}
                   </article>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { ConfirmedOrder } from '../../../../../packages/contracts/src/confirmation';
 import { api, errorMessage } from '../../services/api';
 import { InvoiceView } from './InvoiceView';
+import { ActionButton } from '../../components/ActionButton';
 export function ConfirmedOrdersPage() {
   const [orders, setOrders] = useState<ConfirmedOrder[]>([]),
     [history, setHistory] = useState<ConfirmedOrder[]>([]),
@@ -64,9 +65,9 @@ export function ConfirmedOrdersPage() {
         <p>ยังไม่มีออเดอร์ยืนยัน</p>
       ) : (
         orders.map((o) => (
-          <button disabled={busy} key={o.id} onClick={() => void open(o)}>
+          <ActionButton action="open" disabled={busy} key={o.id} onClick={() => void open(o)}>
             {o.orderNumber} · {o.snapshot.input.customerName} · ฉบับ {o.revision}
-          </button>
+          </ActionButton>
         ))
       )}
       {selected && (

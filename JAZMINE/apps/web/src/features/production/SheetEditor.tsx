@@ -12,6 +12,8 @@ import { api, errorMessage } from '../../services/api';
 import { SheetPreview, type SheetSnapshot } from './SheetPreview';
 import { PrintDetailsEditor } from './PrintDetailsEditor';
 import { useSession } from '../auth/SessionProvider';
+import { ActionButton } from '../../components/ActionButton';
+import { ImagePlus } from 'lucide-react';
 export function SheetEditor({
   context,
   detail,
@@ -198,9 +200,9 @@ export function SheetEditor({
           </p>
         )}
         {pending && (
-          <button disabled={busy} onClick={() => void send(pending)}>
+          <ActionButton action="retry" disabled={busy} onClick={() => void send(pending)}>
             ลองส่งไฟล์คำขอเดิม
-          </button>
+          </ActionButton>
         )}
         <form
           onSubmit={(e) => {
@@ -260,18 +262,24 @@ export function SheetEditor({
             />
           </label>
           {canPrepare && (
-            <button
+            <ActionButton
+              action="save"
+              type="submit"
               className="primary"
               disabled={disabled || !reason.trim() || !allocations.length}
             >
               {detail?.sheet.state === 'READY' ? 'เปิดแก้เป็นร่างฉบับใหม่' : 'บันทึกร่างใบผลิต'}
-            </button>
+            </ActionButton>
           )}
         </form>
         {detail && canPrepare && detail.sheet.state !== 'CANCELLED' && (
-          <button disabled={busy || !reason.trim()} onClick={() => void action('cancel')}>
+          <ActionButton
+            action="cancel"
+            disabled={busy || !reason.trim()}
+            onClick={() => void action('cancel')}
+          >
             ยกเลิกใบผลิตนี้พร้อมเหตุผล
-          </button>
+          </ActionButton>
         )}
         {detail?.sheet.state === 'DRAFT' && !detail.stale && (
           <>
@@ -283,7 +291,9 @@ export function SheetEditor({
             {[...detail.requiredParts, ...OPTIONAL_PARTS].map((part) => (
               <div key={part}>
                 <label>
-                  ไฟล์{PART_LABELS[part]}
+                  <span className="file-field-label">
+                    <ImagePlus size={18} aria-hidden="true" /> ไฟล์{PART_LABELS[part]}
+                  </span>
                   <input
                     aria-label={'ไฟล์' + PART_LABELS[part]}
                     type="file"
@@ -311,7 +321,8 @@ export function SheetEditor({
               </div>
             ))}
             {canPrepare && (
-              <button
+              <ActionButton
+                action="approve"
                 className="primary"
                 disabled={
                   busy ||
@@ -323,15 +334,15 @@ export function SheetEditor({
                 onClick={() => void action('ready')}
               >
                 ตรวจครบแล้ว ทำใบผลิตให้พร้อม
-              </button>
+              </ActionButton>
             )}
           </>
         )}
         {detail?.versions.map((v) => (
           <div key={v.version} className="ps-version-actions">
-            <button disabled={busy} onClick={() => void history(v.version)}>
+            <ActionButton action="open" disabled={busy} onClick={() => void history(v.version)}>
               ดูใบผลิตฉบับ {v.version}
-            </button>
+            </ActionButton>
             <a
               href={`?productionSheet=${id}&version=${v.version}`}
               target="_blank"

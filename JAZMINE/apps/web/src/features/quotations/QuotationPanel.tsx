@@ -4,6 +4,7 @@ import type { QuotationCheck } from '../../../../../packages/contracts/src/quota
 import { businessDate } from '../../../../../packages/contracts/src/customers';
 import { api, errorMessage } from '../../services/api';
 import { useRecordedCommand } from '../../hooks/useRecordedCommand';
+import { ActionButton } from '../../components/ActionButton';
 import { QuotationContents } from './QuotationContents';
 import { QuotationHistory } from './QuotationHistory';
 import './quotations.css';
@@ -85,16 +86,18 @@ export function QuotationPanel({ draft }: { draft: DraftView }) {
               }}
             />
           </label>
-          <button>ກວດລາຄາ / Check quotation</button>
+          <ActionButton action="check" type="submit">
+            ກວດລາຄາ / Check quotation
+          </ActionButton>
         </fieldset>
       </form>
       {(error || command.error) && <p role="alert">{error || command.error}</p>}
       {command.pending && (
         <p className="alert warning">
           ຍັງບໍ່ຮູ້ຜົນ ລອງຄຳຂໍເກົ່າ / Result uncertain; retry the same request.{' '}
-          <button disabled={command.busy} onClick={command.retry}>
+          <ActionButton action="retry" disabled={command.busy} onClick={command.retry}>
             Retry quotation request
-          </button>
+          </ActionButton>
         </p>
       )}
       {issued && (
@@ -131,7 +134,8 @@ export function QuotationPanel({ draft }: { draft: DraftView }) {
                   onChange={(e) => setReason(e.target.value)}
                 />
               </label>
-              <button
+              <ActionButton
+                action="quote"
                 className="primary"
                 disabled={disabled || !reason.trim()}
                 onClick={() => {
@@ -153,7 +157,7 @@ export function QuotationPanel({ draft }: { draft: DraftView }) {
                 }}
               >
                 ອອກໃບ / Issue quotation
-              </button>
+              </ActionButton>
             </>
           )}
         </div>

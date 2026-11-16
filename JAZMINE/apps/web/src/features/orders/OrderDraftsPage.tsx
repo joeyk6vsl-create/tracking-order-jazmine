@@ -5,6 +5,7 @@ import { DraftEditor } from './DraftEditor';
 import { DraftAssetsPanel } from '../assets/DraftAssetsPanel';
 import { ConfirmationPanel } from './ConfirmationPanel';
 import { QuotationPanel } from '../quotations/QuotationPanel';
+import { ActionButton } from '../../components/ActionButton';
 export function OrderDraftsPage() {
   const [drafts, setDrafts] = useState<DraftView[]>([]),
     [selected, setSelected] = useState<DraftView | null>(null),
@@ -37,7 +38,8 @@ export function OrderDraftsPage() {
     <>
       <div className="page-heading">
         <h1>ร่างออเดอร์</h1>
-        <button
+        <ActionButton
+          action="new"
           className="primary"
           onClick={() => {
             setSelected(null);
@@ -46,7 +48,7 @@ export function OrderDraftsPage() {
           }}
         >
           สร้างร่างใหม่
-        </button>
+        </ActionButton>
       </div>
       <p>หลายแบบเสื้อและหลายไซซ์ในร่างเดียว · ตรวจความพร้อมแล้วกดยืนยัน จึงได้เลขออเดอร์จริง</p>
       {error && <p role="alert">{error}</p>}
@@ -58,9 +60,9 @@ export function OrderDraftsPage() {
           <p>ยังไม่มีร่าง</p>
         ) : (
           drafts.map((d) => (
-            <button key={d.id} onClick={() => open(d)}>
+            <ActionButton action="open" key={d.id} onClick={() => open(d)}>
               {d.input.customerName} · {d.id.slice(-8)}
-            </button>
+            </ActionButton>
           ))
         )}
       </details>
@@ -118,7 +120,8 @@ export function OrderDraftsPage() {
               key={'confirm-' + selected.id + selected.rowVersion}
               draft={selected}
             />
-            <button
+            <ActionButton
+              action="edit"
               className="primary"
               onClick={() => {
                 setEditing(true);
@@ -126,7 +129,7 @@ export function OrderDraftsPage() {
               }}
             >
               แก้ไขร่าง
-            </button>
+            </ActionButton>
           </section>
         )
       )}

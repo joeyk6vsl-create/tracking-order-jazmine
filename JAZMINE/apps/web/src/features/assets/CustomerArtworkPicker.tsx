@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { errorMessage } from '../../services/api';
 import { readArtworkFile, type ArtworkFile } from './read-artwork-file';
+import { ImagePlus } from 'lucide-react';
 
 export function CustomerArtworkPicker({
   file,
@@ -35,7 +36,11 @@ export function CustomerArtworkPicker({
         PNG / JPEG / WebP / PDF · 2 MB. ບັນທຶກກັບຮ່າງ / Save one current mockup with this order.
         Admin uploads are ready immediately.
       </p>
+      <label className="file-field-label" htmlFor="customer-artwork">
+        <ImagePlus size={18} aria-hidden="true" /> ແນບຮູບ / Add artwork
+      </label>
       <input
+        id="customer-artwork"
         aria-label="Customer artwork"
         type="file"
         disabled={busy}

@@ -8,6 +8,7 @@ import { api, errorMessage } from '../../services/api';
 import { useSession } from '../auth/SessionProvider';
 import { SheetEditor } from './SheetEditor';
 import { RevisionReviewPanel } from './RevisionReviewPanel';
+import { ActionButton } from '../../components/ActionButton';
 export function ProductionPage() {
   const { session } = useSession(),
     canPrepare = session!.permissions.includes('graphic.approve');
@@ -120,14 +121,15 @@ export function ProductionPage() {
             ไม่แสดงราคาขายให้ผู้เตรียมกราฟิก
           </p>
           {sheets.map((s) => (
-            <button key={s.id} disabled={busy} onClick={() => void open(s.id)}>
+            <ActionButton action="open" key={s.id} disabled={busy} onClick={() => void open(s.id)}>
               {s.sheetNumber ?? 'ร่าง ' + s.id.slice(-8)} ·{' '}
               {s.state === 'READY' ? 'พร้อม' : s.state === 'CANCELLED' ? 'ยกเลิก' : 'ร่าง'} ·
               ออเดอร์ฉบับ {s.orderRevision}
-            </button>
+            </ActionButton>
           ))}
           {canPrepare && (
-            <button
+            <ActionButton
+              action="new"
               disabled={busy}
               className="primary"
               onClick={() => {
@@ -137,7 +139,7 @@ export function ProductionPage() {
               }}
             >
               สร้างใบผลิตร่างใหม่
-            </button>
+            </ActionButton>
           )}
         </section>
       )}

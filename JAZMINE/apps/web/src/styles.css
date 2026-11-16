@@ -103,6 +103,12 @@ button {
 button:hover:not(:disabled) {
   background: var(--control-hover);
 }
+.action-button > svg {
+  flex: 0 0 auto;
+}
+.action-button > span {
+  min-width: 0;
+}
 button:disabled {
   opacity: 0.55;
   cursor: wait;
@@ -143,6 +149,11 @@ label {
   gap: 7px;
   font-size: 14px;
   font-weight: 500;
+}
+.file-field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 h1,
 h2,

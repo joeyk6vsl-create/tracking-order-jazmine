@@ -9,6 +9,7 @@ import {
 } from '../../../../../packages/contracts/src/pricing';
 import { api, errorMessage } from '../../services/api';
 import { useSession } from '../auth/SessionProvider';
+import { ActionButton } from '../../components/ActionButton';
 import { CatalogChoicesForm } from '../catalog/CatalogChoicesForm';
 import { ProductPicker } from '../pricing/ProductPicker';
 import { ProductOptions } from '../pricing/ProductOptions';
@@ -178,9 +179,9 @@ export function OrderItemComposer({
             <div className="notice product-setup-notice">
               <p>ຍັງບໍ່ມີຜ້າ ຫຼື Size / Fabrics or sizes have not been set for this shirt.</p>
               {owner && setupProduct ? (
-                <button type="button" onClick={() => setSetup(setupProduct)}>
+                <ActionButton action="edit" onClick={() => setSetup(setupProduct)}>
                   ຕັ້ງຄ່າແບບນີ້ / Set up this product
-                </button>
+                </ActionButton>
               ) : (
                 <p>ໃຫ້ເຈົ້າຂອງຕັ້ງຄ່າ / Ask the owner to set up this shirt in Catalog.</p>
               )}
@@ -229,12 +230,12 @@ export function OrderItemComposer({
           )}{' '}
           · {selectedSizes.length} Size
         </p>
-        <button type="button" onClick={() => void calculate(false)}>
+        <ActionButton action="check" onClick={() => void calculate(false)}>
           ກວດລາຄາ / Check selected prices
-        </button>
-        <button type="button" className="primary" onClick={() => void calculate(true)}>
+        </ActionButton>
+        <ActionButton action="add" className="primary" onClick={() => void calculate(true)}>
           ເພີ່ມທຸກ Size / Add selected sizes
-        </button>
+        </ActionButton>
       </fieldset>
       {loading && <p role="status">Loading options…</p>}
       {[...new Set(Object.values(currentPrices).flatMap((price) => price?.missing ?? []))].map(
@@ -246,9 +247,9 @@ export function OrderItemComposer({
       )}
       {setup && (
         <section className="product-setup-notice">
-          <button type="button" disabled={busy || disabled} onClick={() => setSetup(null)}>
+          <ActionButton action="cancel" disabled={busy || disabled} onClick={() => setSetup(null)}>
             ປິດ / Close setup
-          </button>
+          </ActionButton>
           <CatalogChoicesForm
             key={setup.id}
             item={setup}

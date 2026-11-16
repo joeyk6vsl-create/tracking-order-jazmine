@@ -6,6 +6,7 @@ import type {
 import { api, errorMessage } from '../../services/api';
 import { QuotationDocument } from './QuotationDocument';
 import { QuotationHistory } from './QuotationHistory';
+import { ActionButton } from '../../components/ActionButton';
 export function QuotationsPage() {
   const [selected, setSelected] = useState(
       () => new URLSearchParams(location.search).get('quotation') ?? '',
@@ -81,7 +82,9 @@ export function QuotationsPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </label>
-          <button disabled={busy}>Search quotations</button>
+          <ActionButton action="search" type="submit" disabled={busy}>
+            Search quotations
+          </ActionButton>
         </form>
         {error && <p role="alert">{error}</p>}
         {busy && <p role="status">Loading…</p>}
@@ -90,20 +93,28 @@ export function QuotationsPage() {
             <ul>
               {result.quotations.map((r) => (
                 <li key={r.id}>
-                  <button onClick={() => open(r.id)}>
+                  <ActionButton action="open" onClick={() => open(r.id)}>
                     {r.number} · Rev {r.revision} · {r.customerName}
-                  </button>
+                  </ActionButton>
                 </li>
               ))}
             </ul>
             {!result.quotations.length && <p>No issued quotations</p>}
-            <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+            <ActionButton
+              action="previous"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
               Previous quotations
-            </button>
+            </ActionButton>
             <span> {page} </span>
-            <button disabled={!result.hasMore} onClick={() => setPage((p) => p + 1)}>
+            <ActionButton
+              action="next"
+              disabled={!result.hasMore}
+              onClick={() => setPage((p) => p + 1)}
+            >
               Next quotations
-            </button>
+            </ActionButton>
           </>
         )}
       </section>

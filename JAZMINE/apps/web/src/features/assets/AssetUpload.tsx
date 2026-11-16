@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { ASSET_LABELS, type UploadAsset } from '../../../../../packages/contracts/src/assets';
 import { api, errorMessage } from '../../services/api';
 import { readArtworkFile } from './read-artwork-file';
+import { ActionButton } from '../../components/ActionButton';
+import { ImagePlus } from 'lucide-react';
 
 export function AssetUpload({
   path,
@@ -58,7 +60,10 @@ export function AssetUpload({
   return (
     <div>
       <label>
-        ແນບ{ASSET_LABELS[kind]} / Add {kind === 'MOCKUP' ? 'mockup' : 'brand file'}
+        <span className="file-field-label">
+          <ImagePlus size={18} aria-hidden="true" /> ແນບ{ASSET_LABELS[kind]} / Add{' '}
+          {kind === 'MOCKUP' ? 'mockup' : 'brand file'}
+        </span>
         <input
           aria-label={'แนบ' + ASSET_LABELS[kind]}
           disabled={busy || uncertain}
@@ -72,17 +77,18 @@ export function AssetUpload({
       </label>
       {file && <p>{file.filename}</p>}
       {file && (
-        <button type="button" disabled={busy} onClick={() => void upload()}>
+        <ActionButton action="upload" disabled={busy} onClick={() => void upload()}>
           {uncertain
             ? 'ລອງຄຳຂໍເດີມ / Retry same upload'
             : readyImmediately
               ? `ບັນທຶກ${ASSET_LABELS[kind]} / Save ${kind === 'MOCKUP' ? 'mockup' : 'brand file'}`
               : `ສົ່ງ${ASSET_LABELS[kind]}ລໍຖ້າກວດ / Send for review`}
-        </button>
+        </ActionButton>
       )}
       {error && <p role="alert">{error}</p>}
       {uncertain && (
-        <button
+        <ActionButton
+          action="refresh"
           type="button"
           disabled={busy}
           onClick={() => {
@@ -91,7 +97,7 @@ export function AssetUpload({
           }}
         >
           ເລືອກໄຟລ໌ໃໝ່ / Choose another file (check history first)
-        </button>
+        </ActionButton>
       )}
     </div>
   );

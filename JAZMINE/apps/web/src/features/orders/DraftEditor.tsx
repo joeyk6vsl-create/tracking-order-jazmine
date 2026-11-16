@@ -16,6 +16,7 @@ import { OrderItemComposer } from './OrderItemComposer';
 import { CustomerArtworkPicker } from '../assets/CustomerArtworkPicker';
 import type { ArtworkFile } from '../assets/read-artwork-file';
 import { useSaveDraftWithArtwork } from './useSaveDraftWithArtwork';
+import { ActionButton } from '../../components/ActionButton';
 export function DraftEditor({
   draft,
   onSaved,
@@ -178,13 +179,13 @@ export function DraftEditor({
                   ? 'ຮ່າງບັນທຶກແລ້ວ ແຕ່ຍັງຢືນຢັນການສົ່ງຮູບບໍ່ໄດ້ / Draft saved; artwork upload is not yet confirmed.'
                   : 'ກວດຄຳຂໍເດີມກ່ອນ / Check the same request before making changes.'}
               </p>
-              <button disabled={saving.busy} onClick={saving.retry}>
+              <ActionButton action="retry" disabled={saving.busy} onClick={saving.retry}>
                 ລອງຄຳຂໍເດີມ / Retry draft and artwork
-              </button>
+              </ActionButton>
               {saving.savedDraft && (
-                <button disabled={saving.busy} onClick={saving.openSaved}>
+                <ActionButton action="open" disabled={saving.busy} onClick={saving.openSaved}>
                   ເປີດຮ່າງເພື່ອກວດຮູບ / Open saved draft and check artwork
-                </button>
+                </ActionButton>
               )}
             </>
           )}
@@ -226,9 +227,12 @@ export function DraftEditor({
               ค้นชื่อลูกค้าประจำ
               <input value={search} onChange={(e) => setSearch(e.target.value)} />
             </label>
-            <button onClick={() => void find()}>ค้นหาลูกค้าประจำ</button>
+            <ActionButton action="search" onClick={() => void find()}>
+              ค้นหาลูกค้าประจำ
+            </ActionButton>
             {matches.map((c) => (
-              <button
+              <ActionButton
+                action="open"
                 key={c.id}
                 onClick={() => {
                   setCustomerId(c.id);
@@ -240,7 +244,7 @@ export function DraftEditor({
                 }}
               >
                 {c.name} · {c.phone}
-              </button>
+              </ActionButton>
             ))}
           </details>
           <label>
@@ -366,7 +370,8 @@ export function DraftEditor({
                 จัดลงรายการแล้ว {lines.reduce((n, l) => n + l.freeQuantity, 0)}{' '}
                 ให้เลือกไซซ์ปลายทางผ่านช่องแถมแต่ละรายการ
               </p>
-              <button
+              <ActionButton
+                action="add"
                 disabled={
                   !lines.length ||
                   lines.some((line, i) => line.quantity === 0 && (i !== 0 || expected === 0))
@@ -379,7 +384,7 @@ export function DraftEditor({
                 }}
               >
                 จัดของแถมทั้งหมดให้รายการแรก
-              </button>
+              </ActionButton>
               {lines.some((line, i) => line.quantity === 0 && (i !== 0 || expected === 0)) && (
                 <p>
                   ມີລາຍການແຖມລ້ວນ / Allocate gifts per line so each gift-only line keeps a positive
@@ -398,16 +403,17 @@ export function DraftEditor({
               onChange={(e) => setReason(e.target.value)}
             />
           </label>
-          <button disabled={!lines.length} onClick={() => void preview()}>
+          <ActionButton action="check" disabled={!lines.length} onClick={() => void preview()}>
             ตรวจยอดรวมร่าง
-          </button>
-          <button
+          </ActionButton>
+          <ActionButton
+            action="save"
             className="primary"
             disabled={!lines.length || !reason.trim()}
             onClick={() => void save()}
           >
             บันทึกร่างออเดอร์
-          </button>
+          </ActionButton>
           {!lines.length && (
             <p role="status">
               ໃສ່ຈຳນວນ ແລ້ວກົດ Add selected sizes ກ່ອນບັນທຶກ / Add the selected sizes above before

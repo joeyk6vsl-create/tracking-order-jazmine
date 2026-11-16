@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { QuotationHistory as History } from '../../../../../packages/contracts/src/quotations';
 import { api, errorMessage } from '../../services/api';
+import { ActionButton } from '../../components/ActionButton';
 export function QuotationHistory({ draftId }: { draftId: string }) {
   const [page, setPage] = useState(1),
     [result, setResult] = useState<History | null>(null),
@@ -53,13 +54,21 @@ export function QuotationHistory({ draftId }: { draftId: string }) {
               </li>
             ))}
           </ul>
-          <button disabled={busy || page === 1} onClick={() => setPage((p) => p - 1)}>
+          <ActionButton
+            action="previous"
+            disabled={busy || page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
             Previous history
-          </button>
+          </ActionButton>
           <span> {page} </span>
-          <button disabled={busy || !result.hasMore} onClick={() => setPage((p) => p + 1)}>
+          <ActionButton
+            action="next"
+            disabled={busy || !result.hasMore}
+            onClick={() => setPage((p) => p + 1)}
+          >
             Next history
-          </button>
+          </ActionButton>
         </>
       )}
     </section>
