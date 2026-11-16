@@ -316,6 +316,7 @@ try {
   await page.getByLabel('แบรนด์ของร่าง', { exact: true }).selectOption('JAZMINE_STANDARD');
   await page.getByRole('button', { name: 'บันทึกร่างออเดอร์', exact: true }).click();
   await page.getByRole('heading', { name: 'บันทึกร่างแล้ว', exact: true }).waitFor();
+  await page.getByRole('tab', { name: /2 ໄຟລ໌ \/ Files/ }).click();
   await page.getByText('ป้ายคอ — ยังไม่มีไฟล์', { exact: true }).waitFor();
   assert.equal((await db.query('SELECT id FROM order_drafts')).length, 1);
   assert.equal((await db.query('SELECT row_version FROM order_drafts'))[0].row_version, 2);
@@ -399,6 +400,7 @@ try {
   );
   await page.screenshot({ path: 'test-results/graphic-assets-mobile.png', fullPage: true });
   await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole('tab', { name: /3 ຢືນຢັນ \/ Confirm/ }).click();
   await page.getByLabel('กำหนดส่งสินค้า', { exact: true }).fill('2026-12-31');
   await page.getByRole('button', { name: 'ตรวจความพร้อมก่อนยืนยัน', exact: true }).click();
   await page.getByLabel('เหตุผลการยืนยัน', { exact: true }).fill('ตรวจรายการราคาและไฟล์ครบแล้ว');
@@ -428,6 +430,7 @@ try {
     .getByLabel('เหตุผลที่แก้ร่าง', { exact: true })
     .fill('เปลี่ยนรายละเอียดงาน ต้องตรวจแบบใหม่');
   await page.getByRole('button', { name: 'บันทึกร่างออเดอร์', exact: true }).click();
+  await page.getByRole('tab', { name: /2 ໄຟລ໌ \/ Files/ }).click();
   await page
     .getByText('แบบตัวอย่าง — ข้อมูลร่างเปลี่ยน ต้องส่งและตรวจฉบับใหม่', { exact: true })
     .waitFor();
@@ -458,8 +461,39 @@ try {
   await page.getByRole('button', { name: 'เพิ่มชื่อและเบอร์เสื้อ', exact: true }).click();
   await page.getByLabel('ชื่อบนเสื้อ 1', { exact: true }).fill('ສົມພອນ');
   await page.getByLabel('เบอร์บนเสื้อ 1', { exact: true }).fill('07');
+  await page.getByLabel('ไซซ์สำหรับรายชื่อที่วาง', { exact: true }).selectOption('1');
+  await page
+    .getByLabel('วางชื่อและเบอร์เสื้อหลายบรรทัด', { exact: true })
+    .fill('ALICE\t11\nBOB\t12\nCARL\t13');
+  await page.getByRole('button', { name: 'ตรวจรายชื่อที่วาง', exact: true }).click();
+  await page
+    .getByText('จำนวนรายชื่อเกินจำนวนที่จัดผลิตหรือเกิน 2,000 คน', { exact: true })
+    .waitFor();
+  await page
+    .getByLabel('วางชื่อและเบอร์เสื้อหลายบรรทัด', { exact: true })
+    .fill('ALICE\t11\nBOB\t12');
+  await page.getByRole('button', { name: 'ตรวจรายชื่อที่วาง', exact: true }).click();
+  await page.getByRole('button', { name: 'เพิ่ม 2 คนในใบผลิต', exact: true }).click();
+  assert.equal(await page.getByLabel('ชื่อบนเสื้อ 3', { exact: true }).inputValue(), 'BOB');
   await page.getByLabel('เหตุผลใบผลิต', { exact: true }).fill('เตรียมชุดแรก');
+  const sheetSave = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PUT' &&
+      /\/api\/v1\/production\/sheets\/[0-9a-f-]+$/.test(response.url()),
+  );
   await page.getByRole('button', { name: 'บันทึกร่างใบผลิต', exact: true }).click();
+  const sheetSaveResponse = await sheetSave;
+  assert.equal(sheetSaveResponse.status(), 200, await sheetSaveResponse.text());
+  const savedNames = (await db.query('SELECT print_details FROM production_sheets'))[0]
+    .print_details.names;
+  assert.deepEqual(
+    savedNames.map((row) => [row.lineIndex, row.name, row.number]),
+    [
+      [0, 'ສົມພອນ', '07'],
+      [1, 'ALICE', '11'],
+      [1, 'BOB', '12'],
+    ],
+  );
   await page.getByRole('button', { name: 'ตรวจครบแล้ว ทำใบผลิตให้พร้อม', exact: true }).waitFor();
   assert.equal(
     await page

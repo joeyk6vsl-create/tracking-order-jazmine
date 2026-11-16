@@ -2,6 +2,60 @@
 .size-quantity-panel {
   min-width: 0;
 }
+.order-workflow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-width: 0;
+}
+.order-workflow-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.order-workflow-summary details {
+  flex-basis: 100%;
+}
+.order-total {
+  font-size: 22px;
+  color: var(--success-ink);
+}
+.order-total.missing {
+  color: var(--warning-ink);
+}
+.order-workflow-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.order-workflow-tabs button {
+  min-width: 0;
+  padding: 10px;
+  white-space: normal;
+  border-color: var(--line);
+}
+.order-workflow-tabs button[aria-selected='true'] {
+  background: var(--accent-soft);
+  border-color: var(--blue);
+  color: var(--accent-ink);
+}
+.order-workflow [hidden] {
+  display: none !important;
+}
+@media (max-width: 480px) {
+  .order-workflow-tabs button {
+    flex-direction: column;
+    line-height: 1.3;
+    padding: 8px 2px;
+    gap: 3px;
+    font-size: 12px;
+  }
+  .order-tab-en {
+    display: none;
+  }
+}
 .size-quantity-table {
   width: 100%;
   table-layout: fixed;

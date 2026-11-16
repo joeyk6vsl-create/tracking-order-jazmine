@@ -13,8 +13,7 @@ export function DraftAssetsPanel({ draftId }: { draftId: string }) {
     canReview =
       session!.user!.role === 'ADMIN_PROMAX' ||
       ['ADMIN', 'GRAPHIC'].includes(session!.user!.department),
-    readyImmediately =
-      session!.user!.role === 'ADMIN_PROMAX' || session!.user!.department === 'ADMIN';
+    readyImmediately = canReview;
   const [data, setData] = useState<AssetChecklist | null>(null),
     [reload, setReload] = useState(0),
     [error, setError] = useState(''),
@@ -49,20 +48,30 @@ export function DraftAssetsPanel({ draftId }: { draftId: string }) {
       setBusy(false);
     }
   }
+  const hasPendingReview =
+    data &&
+    ASSET_KINDS.some((kind) => {
+      const latest = data.assets.find((asset) => asset.kind === kind);
+      return latest?.status === 'PENDING' && !latest.stale;
+    });
   return (
     <section className="panel pricing-panel">
       <h2>ໄຟລ໌ອໍເດີ / Order files</h2>
       <ActionButton action="refresh" disabled={busy} onClick={() => setReload((n) => n + 1)}>
         โหลดไฟล์ล่าสุด
       </ActionButton>
-      <p>
-        PNG / JPEG / WebP / PDF · 2 MB per file. ແອດມິນອັບໂຫຼດແລ້ວໃຊ້ໄດ້ / Admin uploads are ready
-        immediately.
-      </p>
-      <p>
-        ປ້າຍຄໍ/ເທບຄໍໃຊ້ຈາກຄັງຂອງ JAZMINE ຫຼືລູກຄ້າປະຈຳ / Label and tape come from the saved brand
-        library. ແບບຕົວຢ່າງໃສ່ຕໍ່ອໍເດີ / Add one current mockup for this order.
-      </p>
+      <p>ໃສ່ແບບຕົວຢ່າງຂອງອໍເດີ / Add this order's mockup.</p>
+      <details>
+        <summary>ຂໍ້ມູນໄຟລ໌ / File details</summary>
+        <p>
+          PNG / JPEG / WebP / PDF · 2 MB per file. ເຈົ້າຂອງ, Admin ແລະ Graphic ອັບໂຫຼດແລ້ວໃຊ້ໄດ້ /
+          Authorized uploads are ready immediately.
+        </p>
+        <p>
+          ປ້າຍຄໍ/ເທບຄໍໃຊ້ຈາກຄັງຂອງ JAZMINE ຫຼືລູກຄ້າປະຈຳ / Label and tape come from the saved brand
+          library.
+        </p>
+      </details>
       {error && (
         <p className="alert error" role="alert">
           {error}
@@ -85,7 +94,7 @@ export function DraftAssetsPanel({ draftId }: { draftId: string }) {
               </ul>
             )}
           </div>
-          {canReview && (
+          {canReview && hasPendingReview && (
             <label>
               เหตุผลการตรวจไฟล์
               <input
@@ -114,7 +123,7 @@ export function DraftAssetsPanel({ draftId }: { draftId: string }) {
                 ) : (
                   <p>
                     {data.labelSource === 'CUSTOMER'
-                      ? 'ໄຟລ໌ລູກຄ້າປະຈຳ / Set this once in the customer profile.'
+                      ? 'ໄຟລ໌ລູກຄ້າປະຈຳ / Set once in the customer brand library under Graphic assets.'
                       : data.labelSource === 'JAZMINE'
                         ? 'ໄຟລ໌ JAZMINE / Set this once in the JAZMINE library under Graphic assets.'
                         : 'ເລືອກແບຣນກ່ອນ / Choose the brand first.'}

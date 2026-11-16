@@ -34,7 +34,7 @@ export function CustomerArtworkPicker({
       <h3>ຮູບທີ່ລູກຄ້າສັ່ງ / Customer artwork</h3>
       <p>
         PNG / JPEG / WebP / PDF · 2 MB. ບັນທຶກກັບຮ່າງ / Save one current mockup with this order.
-        Admin uploads are ready immediately.
+        Owner, Admin and Graphic uploads are ready immediately.
       </p>
       <label className="file-field-label" htmlFor="customer-artwork">
         <ImagePlus size={18} aria-hidden="true" /> ແນບຮູບ / Add artwork

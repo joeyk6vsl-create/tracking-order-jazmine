@@ -63,4 +63,5 @@ export type GraphicQueueItem = {
   rowVersion: number;
   customerName: string;
   brandingType: string | null;
+  customerId: string | null;
 };

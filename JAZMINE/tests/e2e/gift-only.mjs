@@ -168,7 +168,7 @@ try {
   });
   await page.getByRole('button', { name: 'บันทึกร่างออเดอร์', exact: true }).click();
   await page.getByRole('alert').filter({ hasText: 'เชื่อมต่อระบบไม่ได้' }).waitFor();
-  await page.getByRole('button', { name: 'บันทึกร่างออเดอร์', exact: true }).click();
+  await page.getByRole('button', { name: /Retry draft and artwork/ }).click();
   await page.getByRole('heading', { name: 'บันทึกร่างแล้ว', exact: true }).waitFor();
   const stored = (await f.db.query('SELECT * FROM order_drafts WHERE id=$1', [draftId]))[0];
   assert.equal(stored.row_version, 2);
@@ -188,6 +188,7 @@ try {
     await assets.review(f.actors.GRAPHIC, id, 'APPROVED', 'ตรวจไฟล์ทดสอบของแถม');
   }
   await openDraft();
+  await page.getByRole('tab', { name: /3 ຢືນຢັນ \/ Confirm/ }).click();
   await page.getByLabel('กำหนดส่งสินค้า', { exact: true }).fill(businessDate());
   await page.getByRole('button', { name: 'ตรวจความพร้อมก่อนยืนยัน', exact: true }).click();
   await page

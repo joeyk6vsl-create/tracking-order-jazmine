@@ -113,8 +113,11 @@ test('graphic files preserve versions, enforce approvals, share central branding
       filename: 'v2.png',
       base64: png,
     });
-    await service.review(graphic, replacement, 'REJECTED', 'ตำแหน่งโลโก้ไม่ตรง');
-    await assert.rejects(service.review(graphic, replacement, 'APPROVED', 'เปลี่ยนใจ'));
+    assert.equal(
+      (await service.checklist(admin, first)).assets.find((a) => a.id === replacement)?.status,
+      'APPROVED',
+    );
+    await assert.rejects(service.review(graphic, replacement, 'REJECTED', 'ตำแหน่งโลโก้ไม่ตรง'));
     const newest = randomUUID();
     await service.upload(graphic, newest, {
       draftId: first,
@@ -136,6 +139,10 @@ test('graphic files preserve versions, enforce approvals, share central branding
       base64: png,
     });
     await db.query('UPDATE order_drafts SET row_version=3 WHERE id=$1', [first]);
+    assert.equal(
+      (await service.checklist(admin, first)).assets.find((a) => a.id === pending)?.stale,
+      true,
+    );
     await assert.rejects(service.review(graphic, pending, 'APPROVED', 'ใช้ฉบับเก่าไม่ได้'));
     await db.query('UPDATE order_drafts SET input_json=$2 WHERE id=$1', [
       second,
@@ -173,6 +180,18 @@ test('graphic files preserve versions, enforce approvals, share central branding
       await assert.rejects(service.uploadLibrary(printing, randomUUID(), customerId, data));
     }
     assert.equal((await service.library(admin, customerId)).ready, true);
+    assert.equal((await service.library(graphic, customerId)).ready, true);
+    const graphicLabel = randomUUID();
+    assert.equal(
+      (
+        await service.uploadLibrary(graphic, graphicLabel, customerId, {
+          kind: 'NECK_LABEL',
+          filename: 'venus-graphic.png',
+          base64: png,
+        })
+      ).asset.status,
+      'APPROVED',
+    );
     const venusDraft = randomUUID();
     await db.query(
       'INSERT INTO order_drafts(id,input_json,quote_json,selection_json,request_hash,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$6)',
@@ -188,7 +207,7 @@ test('graphic files preserve versions, enforce approvals, share central branding
     assert.equal((await service.checklist(admin, venusDraft)).labelSource, 'CUSTOMER');
     assert.equal(
       (await service.checklist(admin, venusDraft)).assets.filter((a) => a.kind !== 'MOCKUP').length,
-      2,
+      3,
     );
     await service.upload(admin, randomUUID(), {
       draftId: venusDraft,
@@ -218,7 +237,7 @@ test('graphic files preserve versions, enforce approvals, share central branding
     });
     assert.equal(
       (await service.checklist(admin, first)).assets.find((a) => a.id === graphicFile)?.status,
-      'PENDING',
+      'APPROVED',
     );
     await assert.rejects(service.review(printing, graphicFile, 'APPROVED', 'ไม่ได้รับสิทธิ์'));
     await service.review(admin, graphicFile, 'APPROVED', 'แอดมินตรวจไฟล์เก่า');

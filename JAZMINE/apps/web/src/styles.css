@@ -155,6 +155,33 @@ label {
   align-items: center;
   gap: 8px;
 }
+.bulk-names-paste {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+.bulk-names-paste textarea {
+  min-height: 120px;
+}
+.bulk-names-paste > .action-button,
+.bulk-names-paste [role='status'] > .action-button {
+  justify-self: start;
+}
+.bulk-names-preview {
+  max-height: 220px;
+  overflow: auto;
+}
+.bulk-names-pages {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
 h1,
 h2,
 h3,

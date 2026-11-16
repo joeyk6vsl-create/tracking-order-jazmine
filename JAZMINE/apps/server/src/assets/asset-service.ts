@@ -49,7 +49,7 @@ export class AssetService {
     await this.access(this.db, actor);
     return {
       drafts: await this.db.query(
-        `SELECT id,row_version AS "rowVersion",input_json->>'customerName' AS "customerName",input_json->>'brandingType' AS "brandingType" FROM order_drafts WHERE NOT EXISTS(SELECT 1 FROM orders o WHERE o.draft_id=order_drafts.id AND (o.storage_state='ARCHIVED' OR o.business_state='CANCELLED')) ORDER BY updated_at DESC,id DESC LIMIT 50`,
+        `SELECT id,row_version AS "rowVersion",input_json->>'customerName' AS "customerName",input_json->>'brandingType' AS "brandingType",input_json->>'customerId' AS "customerId" FROM order_drafts WHERE NOT EXISTS(SELECT 1 FROM orders o WHERE o.draft_id=order_drafts.id AND (o.storage_state='ARCHIVED' OR o.business_state='CANCELLED')) ORDER BY updated_at DESC,id DESC LIMIT 50`,
       ),
     };
   }
@@ -108,7 +108,7 @@ export class AssetService {
     return 'CUSTOMER:' + customerId;
   }
   async library(actor: UserView, customerId: string | null) {
-    await this.auth.require(this.db, actor, 'customers.manage');
+    await this.access(this.db, actor);
     const key = await this.libraryScope(this.db, customerId);
     const assets = (await this.db.query(
       `SELECT ${projection} FROM graphic_assets WHERE scope_key=$1 AND kind=ANY($2::text[]) ORDER BY kind,revision DESC`,
@@ -130,13 +130,13 @@ export class AssetService {
     customerId: string | null,
     data: UploadBrandAsset,
   ) {
-    await this.auth.require(this.db, actor, 'customers.manage');
+    await this.access(this.db, actor);
     const { bytes, mime } = validateAsset(data.base64);
     const requestHash = createHash('sha256')
       .update(actor.id + String(customerId) + JSON.stringify(data))
       .digest('hex');
     return this.db.transaction(async (sql) => {
-      const fresh = await this.auth.require(sql, actor, 'customers.manage', true);
+      const fresh = await this.access(sql, actor, true);
       await sql.query('LOCK TABLE graphic_assets IN SHARE ROW EXCLUSIVE MODE');
       const key = await this.libraryScope(sql, customerId);
       const previous = (
@@ -176,7 +176,7 @@ export class AssetService {
         ],
       );
       await sql.query(
-        "UPDATE graphic_assets SET status='APPROVED',reviewed_by=$2,review_reason='ตรวจโดยแอดมินขณะอัปโหลด',reviewed_at=now() WHERE id=$1",
+        "UPDATE graphic_assets SET status='APPROVED',reviewed_by=$2,review_reason='พร้อมใช้เมื่อผู้มีสิทธิ์อัปโหลด',reviewed_at=now() WHERE id=$1",
         [id, fresh.id],
       );
       await recordAudit(sql, actor.id, 'BRAND_FILE_UPLOADED', id, undefined, {
@@ -248,10 +248,13 @@ export class AssetService {
           actor.id,
         ],
       );
-      const approvedOnUpload = fresh.role === 'ADMIN_PROMAX' || fresh.department === 'ADMIN';
+      const approvedOnUpload =
+        fresh.role === 'ADMIN_PROMAX' ||
+        fresh.department === 'ADMIN' ||
+        fresh.department === 'GRAPHIC';
       if (approvedOnUpload)
         await sql.query(
-          "UPDATE graphic_assets SET status='APPROVED',reviewed_by=$2,review_reason='ตรวจโดยแอดมินขณะอัปโหลด',reviewed_at=now() WHERE id=$1",
+          "UPDATE graphic_assets SET status='APPROVED',reviewed_by=$2,review_reason='พร้อมใช้เมื่อผู้มีสิทธิ์อัปโหลด',reviewed_at=now() WHERE id=$1",
           [id, fresh.id],
         );
       await recordAudit(sql, actor.id, 'GRAPHIC_FILE_UPLOADED', id, undefined, {
@@ -281,6 +284,22 @@ export class AssetService {
       )[0];
       if (!asset) throw new AppError('NOT_FOUND', 'ไม่พบไฟล์', 404);
       if (asset.status !== 'PENDING') {
+        if (asset.status === 'APPROVED' && decision === 'APPROVED') {
+          const newer = await sql.query(
+            'SELECT MAX(revision) AS revision FROM graphic_assets WHERE scope_key=$1 AND kind=$2',
+            [asset.scope_key, asset.kind],
+          );
+          if (Number(newer[0].revision) !== Number(asset.revision))
+            throw new AppError('NEWER_FILE', 'มีไฟล์ฉบับใหม่แล้ว', 409);
+          if (String(asset.scope_key).startsWith('DRAFT:')) {
+            const draft = await sql.query('SELECT row_version FROM order_drafts WHERE id=$1', [
+              asset.origin_draft_id,
+            ]);
+            if (Number(draft[0]?.row_version) !== Number(asset.draft_version))
+              throw new AppError('STALE_GRAPHIC', 'ร่างเปลี่ยนแล้ว ต้องส่งไฟล์ฉบับใหม่', 409);
+          }
+          return { ok: true };
+        }
         if (
           asset.status === decision &&
           asset.review_reason === reason &&

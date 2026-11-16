@@ -342,6 +342,7 @@ try {
     });
   }
   await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.getByRole('tab', { name: /3 ຢືນຢັນ \/ Confirm/ }).click();
   await page.getByLabel('กำหนดส่งสินค้า', { exact: true }).fill(businessDate());
   await page.getByRole('button', { name: 'ตรวจความพร้อมก่อนยืนยัน', exact: true }).click();
   await page.getByLabel('เหตุผลการยืนยัน', { exact: true }).fill('TEST ONLY: new manual product');

@@ -26,10 +26,12 @@ export function GraphicAssetsPage() {
       alive = false;
     };
   }, []);
+  const selectedDraft = drafts.find((draft) => draft.id === selected);
   return (
     <>
       <h1>ไฟล์และงานกราฟิก</h1>
-      {session!.permissions.includes('customers.manage') && <BrandAssetLibrary name="JAZMINE" />}
+      {(session!.permissions.includes('customers.manage') ||
+        session!.permissions.includes('graphic.approve')) && <BrandAssetLibrary name="JAZMINE" />}
       <p>
         ແບບຕົວຢ່າງຂອງແຕ່ລະອໍເດີ / Choose an order draft to view its current mockup. Latest 50
         drafts.
@@ -55,6 +57,13 @@ export function GraphicAssetsPage() {
         </label>
       )}
       {selected && <DraftAssetsPanel key={selected} draftId={selected} />}
+      {selectedDraft?.brandingType === 'CUSTOM_AGENT' && selectedDraft.customerId && (
+        <BrandAssetLibrary
+          key={selected + '-brand'}
+          customerId={selectedDraft.customerId}
+          name={selectedDraft.customerName}
+        />
+      )}
     </>
   );
 }
